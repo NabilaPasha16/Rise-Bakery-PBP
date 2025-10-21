@@ -7,6 +7,7 @@ import 'detail_page.dart';
 import 'category_page.dart';
 import 'cart_page.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'login_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -137,6 +138,37 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+              // Card yang dapat diklik untuk membuka Clairmont Cake di browser
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () => _openClairmont(context),
+                  child: Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.language, color: Colors.pinkAccent),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Kunjungi Clairmont Cake',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const Icon(Icons.open_in_new, color: Colors.grey),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
               Expanded(
@@ -524,5 +556,18 @@ GFAccordion(
     final parts = local.replaceAll(RegExp(r'[._]'), ' ').split(' ');
     final transformed = parts.map((p) => p.isEmpty ? p : '${p[0].toUpperCase()}${p.substring(1)}').join(' ');
     return transformed;
+  }
+}
+
+// Helper to open Clairmont site in external browser
+Future<void> _openClairmont(BuildContext context) async {
+  final uri = Uri.parse('https://clairmontcake.co.id/');
+  try {
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gagal membuka situs')));
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gagal membuka situs')));
   }
 }

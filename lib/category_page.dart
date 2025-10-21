@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'utils/formatters.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'model/cake.dart';
 import 'detail_page.dart';
@@ -25,7 +25,8 @@ class _CategoryPageState extends State<CategoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(locale: "id_ID", symbol: "Rp ");
+  // Use shared formatter util
+  // final currencyFormat = NumberFormat.currency(locale: "id_ID", symbol: "Rp ");
 
     return Scaffold(
       appBar: AppBar(
@@ -58,7 +59,7 @@ class _CategoryPageState extends State<CategoryPage> {
                 style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
               ),
               subtitle: Text(
-                currencyFormat.format(cake.price),
+                formatRupiah(cake.price),
                 style: GoogleFonts.montserrat(color: Colors.pink.shade700),
               ),
                   trailing: Row(

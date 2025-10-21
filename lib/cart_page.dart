@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'model/cake.dart';
+import 'utils/formatters.dart';
 
 class CartPage extends StatefulWidget {
   /// If [buyNowItem] is provided, CartPage will show a single-item checkout
@@ -64,7 +64,7 @@ class _CartPageState extends State<CartPage> {
   }
 
   Widget _buildBuyNowBody(Cake item) {
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ');
+  // final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ');
     return ListView(
       padding: const EdgeInsets.only(top: 8, bottom: 80),
       children: [
@@ -101,7 +101,7 @@ class _CartPageState extends State<CartPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(currency.format(item.price), style: GoogleFonts.montserrat(fontWeight: FontWeight.bold, color: Colors.pink.shade800)),
+                    Text(formatRupiah(item.price), style: GoogleFonts.montserrat(fontWeight: FontWeight.bold, color: Colors.pink.shade800)),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -129,7 +129,7 @@ Widget _buildCartBody() {
     );
   }
 
-  final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ');
+  // final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ');
   final double totalHarga = _items.fold(0.0, (sum, it) => sum + it.price);
 
   return Column(
@@ -154,7 +154,7 @@ Widget _buildCartBody() {
                   ),
                 ),
                 title: Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                subtitle: Text(currency.format(item.price)),
+                subtitle: Text(formatRupiah(item.price)),
                 trailing: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -186,7 +186,7 @@ Widget _buildCartBody() {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Total:', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Text(currency.format(totalHarga), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.pink)),
+            Text(formatRupiah(totalHarga), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.pink)),
           ],
         ),
       ),
@@ -196,7 +196,7 @@ Widget _buildCartBody() {
 
 
   Widget _buildBottomBar(bool isBuyNow) {
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ');
+  // final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ');
     if (isBuyNow) {
       return Container(
         padding: const EdgeInsets.all(16),
@@ -208,7 +208,7 @@ Widget _buildCartBody() {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text("Total:", style: GoogleFonts.montserrat(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w600)),
-                Text(currency.format(totalPrice), style: GoogleFonts.montserrat(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(formatRupiah(totalPrice), style: GoogleFonts.montserrat(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
               ],
             ),
             ElevatedButton(
@@ -217,7 +217,7 @@ Widget _buildCartBody() {
                   context: context,
                   builder: (ctx) => AlertDialog(
                     title: const Text('Konfirmasi Pembelian'),
-                    content: Text('Total: ${currency.format(totalPrice)}. Lanjutkan pembayaran?'),
+                    content: Text('Total: ${formatRupiah(totalPrice)}. Lanjutkan pembayaran?'),
                     actions: [
                       TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
                       TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Bayar')),
@@ -249,7 +249,7 @@ Widget _buildCartBody() {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("Total:", style: GoogleFonts.montserrat(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w600)),
-              Text(NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ').format(totalPrice), style: GoogleFonts.montserrat(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(formatRupiah(totalPrice), style: GoogleFonts.montserrat(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             ],
           ),
           ElevatedButton(
@@ -258,7 +258,7 @@ Widget _buildCartBody() {
                 context: context,
                 builder: (ctx) => AlertDialog(
                   title: const Text('Konfirmasi Pembelian'),
-                  content: Text('Total: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ').format(totalPrice)}. Lanjutkan pembayaran?'),
+                  content: Text('Total: ${formatRupiah(totalPrice)}. Lanjutkan pembayaran?'),
                   actions: [
                     TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
                     TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Bayar')),

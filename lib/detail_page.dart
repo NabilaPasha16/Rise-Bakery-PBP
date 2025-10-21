@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'utils/formatters.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animated_rating_stars/animated_rating_stars.dart';
 
@@ -12,7 +12,8 @@ class DetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ');
+  // use shared formatter util
+  // final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ');
 
     return Scaffold(
       appBar: AppBar(
@@ -54,7 +55,7 @@ class DetailPage extends StatelessWidget {
               ),
             const SizedBox(height: 8),
             Text(
-              "Harga: ${currencyFormat.format(cake.price)}",
+              "Harga: ${formatRupiah(cake.price)}",
               style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
