@@ -3,7 +3,7 @@ import 'utils/formatters.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'model/cake.dart';
 import 'detail_page.dart';
-import 'cart_page.dart';
+import 'utils/cart_manager.dart';
 
 class CategoryPage extends StatefulWidget {
   final String category;
@@ -20,22 +20,15 @@ class CategoryPage extends StatefulWidget {
 }
 
 class _CategoryPageState extends State<CategoryPage> {
-  // local cart for backward compatibility
-  final List<Cake> cartItems = [];
-
   @override
   Widget build(BuildContext context) {
-  // Use shared formatter util
-  // final currencyFormat = NumberFormat.currency(locale: "id_ID", symbol: "Rp ");
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
           widget.category,
-          style: GoogleFonts.fredoka(fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.pink.shade200,
-        // no actions (cart icon removed as requested)
       ),
       body: ListView.builder(
         itemCount: widget.cakes.length,
@@ -44,73 +37,126 @@ class _CategoryPageState extends State<CategoryPage> {
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             elevation: 3,
-            child: ListTile(
-              leading: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  cake.imagePath,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              title: Text(
-                cake.name,
-                style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                formatRupiah(cake.price),
-                style: GoogleFonts.montserrat(color: Colors.pink.shade700),
-              ),
-                  trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Tombol detail
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DetailPage(cake: cake),
+            child: InkWell(
+              // klik seluruh card -> buka halaman detail
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailPage(cake: cake),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  children: [
+                    // Gambar kue
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.asset(
+                        cake.imagePath,
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+
+                    // Nama + harga
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            cake.name,
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            formatRupiah(cake.price),
+                            style: GoogleFonts.poppins(
+                              color: Colors.pink.shade700,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Tombol Beli & Keranjang sejajar
+                    Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: const Text('Konfirmasi Pembelian'),
+                                content: Text('Beli ${cake.name} seharga ${formatRupiah(cake.price)}?'),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
+                                  TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Bayar')),
+                                ],
+                              ),
+                            );
+                            if (confirm == true) {
+                              // simulate purchase success
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Pembelian ${cake.name} berhasil!')));
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange.shade400,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 6,
+                            ),
+                          ),
+                          child: const Text(
+                            'Beli',
+                            style: TextStyle(fontSize: 13),
+                          ),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.pink.shade400,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                        const SizedBox(height: 6),
+                        OutlinedButton(
+                          onPressed: () {
+                            CartManager().add(cake);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${cake.name} ditambahkan ke keranjang'),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Colors.pink.shade400),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                          ),
+                          child: Text(
+                            'Keranjang',
+                            style: TextStyle(
+                              color: Colors.pink.shade400,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    child: const Text("Detail"),
-                  ),
-                  const SizedBox(width: 6),
-                  // Tombol Beli langsung (buy-now: navigate to CartPage with single item)
-                  ElevatedButton(
-                    onPressed: () async {
-                      // Direct buy: navigate to CartPage in buy-now mode
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => CartPage(buyNowItem: cake)),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange.shade400,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: const Text('Beli'),
-                  ),
-                  const SizedBox(width: 6),
-                  // Tombol tambah ke keranjang (global)
-                      IconButton(
-                        icon: const Icon(Icons.add_shopping_cart),
-                        color: Colors.pink.shade400,
-                        tooltip: "Tambah ke Keranjang",
-                        onPressed: () {
-                          // Open CartPage with this single item
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => CartPage(items: [cake])));
-                        },
-                      ),
-                ],
+                  ],
+                ),
               ),
             ),
           );

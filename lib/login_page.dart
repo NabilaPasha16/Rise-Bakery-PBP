@@ -121,11 +121,11 @@ class _LoginPageState extends State<LoginPage> {
                 width: formWidth,
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.92),
+                  color: Colors.white.withAlpha((0.92 * 255).round()),
                   borderRadius: BorderRadius.circular(32),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.pink.withOpacity(0.2),
+                      color: Colors.pink.withAlpha((0.2 * 255).round()),
                       blurRadius: 24,
                       offset: const Offset(0, 8),
                     ),
@@ -176,7 +176,7 @@ class _LoginPageState extends State<LoginPage> {
                     TextField(
                       controller: passwordController,
                       obscureText: _isObscure,
-                      style: GoogleFonts.montserrat(fontSize: 18),
+                      style: GoogleFonts.poppins(fontSize: 18),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.pink[50],
@@ -215,7 +215,7 @@ class _LoginPageState extends State<LoginPage> {
                     color: const Color.fromARGB(255, 237, 226, 125),
                     elevation: 6,
                     shape: GFButtonShape.pills,     // bentuk rounded pills
-                    textStyle: GoogleFonts.montserrat(
+                      textStyle: GoogleFonts.poppins(
                     fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white
   ),
 ),

@@ -1,9 +1,128 @@
 import 'package:flutter/material.dart';
-import 'package:getwidget/getwidget.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'login_page.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'dart:io';
+// removed unused imports
+// device info removed: profile page now only supports edit + logout
+import 'package:shared_preferences/shared_preferences.dart';
+
+typedef OnProfileSave = Future<void> Function(String name, String email, String avatarPath);
+
+class _EditProfileForm extends StatefulWidget {
+  final String initialName;
+  final String initialEmail;
+  final String initialAvatar;
+  final OnProfileSave onSave;
+
+  const _EditProfileForm({Key? key, required this.initialName, required this.initialEmail, required this.initialAvatar, required this.onSave}) : super(key: key);
+
+  @override
+  State<_EditProfileForm> createState() => _EditProfileFormState();
+}
+
+class _EditProfileFormState extends State<_EditProfileForm> {
+  late TextEditingController _nameCtrl;
+  late TextEditingController _emailCtrl;
+  late TextEditingController _avatarCtrl;
+  final _formKey = GlobalKey<FormState>();
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameCtrl = TextEditingController(text: widget.initialName);
+    _emailCtrl = TextEditingController(text: widget.initialEmail);
+    _avatarCtrl = TextEditingController(text: widget.initialAvatar);
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _emailCtrl.dispose();
+    _avatarCtrl.dispose();
+    super.dispose();
+  }
+
+  Widget _avatarPreview() {
+    final path = _avatarCtrl.text.trim();
+    if (path.isEmpty) return const CircleAvatar(radius: 48, backgroundColor: Colors.grey);
+    if (path.startsWith('http')) return CircleAvatar(radius: 48, backgroundImage: NetworkImage(path));
+    // asset
+    return CircleAvatar(radius: 48, backgroundImage: AssetImage(path));
+  }
+
+  Future<void> _onSavePressed() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _saving = true);
+    try {
+      await widget.onSave(_nameCtrl.text.trim(), _emailCtrl.text.trim(), _avatarCtrl.text.trim().isEmpty ? 'assets/profil.png' : _avatarCtrl.text.trim());
+      if (mounted) Navigator.of(context).pop();
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(child: _avatarPreview()),
+          const SizedBox(height: 8),
+          TextButton.icon(
+            onPressed: () async {
+              // Quick input dialog for avatar path
+              final ctrl = TextEditingController(text: _avatarCtrl.text);
+              final result = await showDialog<String?>(context: context, builder: (ctx) => AlertDialog(
+                title: const Text('Change Photo (asset path or URL)'),
+                content: TextField(controller: ctrl, decoration: const InputDecoration(hintText: 'assets/profil.png or https://...')),
+                actions: [TextButton(onPressed: () => Navigator.pop(ctx, null), child: const Text('Cancel')), TextButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: const Text('OK'))],
+              ));
+              if (result != null) setState(() => _avatarCtrl.text = result);
+            },
+            icon: const Icon(Icons.camera_alt_outlined),
+            label: const Text('Change Photo'),
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _nameCtrl,
+            decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
+            validator: (v) => v == null || v.trim().isEmpty ? 'Please enter a name' : null,
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _emailCtrl,
+            decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) return 'Please enter email';
+              final email = v.trim();
+              if (!RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+").hasMatch(email)) return 'Invalid email';
+              return null;
+            },
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _saving ? null : () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _saving ? null : _onSavePressed,
+                  child: _saving ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('Save Changes'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class ProfilePage extends StatefulWidget {
   final String email;
@@ -14,164 +133,68 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
-  Map<String, dynamic> _deviceData = {};
-  bool _loadingDevice = true;
+  // no device info state needed
+  String? _displayName;
+  String? _avatarPath; // either asset path or stored path
 
   @override
   void initState() {
     super.initState();
-    _initDeviceInfo();
+    // removed device info init
+    _loadProfile();
   }
 
-  Future<void> _initDeviceInfo() async {
-    try {
-      if (Platform.isAndroid) {
-        final info = await _deviceInfo.androidInfo;
-        setState(() => _deviceData = _readAndroidBuildData(info));
-      } else if (Platform.isIOS) {
-        final info = await _deviceInfo.iosInfo;
-        setState(() => _deviceData = _readIosDeviceInfo(info));
-      } else {
-        final info = await _deviceInfo.deviceInfo;
-        setState(() => _deviceData = info.data);
-      }
-      setState(() => _loadingDevice = false);
-    } catch (e) {
-      setState(() {
-        _deviceData = {'error': 'Failed to get device info: $e'};
-        _loadingDevice = false;
-      });
-    }
+  Future<void> _loadProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _displayName = prefs.getString('displayName') ?? _displayNameFromEmail(widget.email);
+      _avatarPath = prefs.getString('avatarPath') ?? 'assets/profil.png';
+    });
   }
 
-  Map<String, dynamic> _readAndroidBuildData(AndroidDeviceInfo build) {
-    return <String, dynamic>{
-      'brand': build.brand,
-      'model': build.model,
-      'device': build.device,
-      'manufacturer': build.manufacturer,
-      'androidVersion': build.version.release,
-      'sdkInt': build.version.sdkInt,
-      'isPhysicalDevice': build.isPhysicalDevice,
-    };
+  Future<void> _saveProfile({String? name, String? avatarPath}) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (name != null) await prefs.setString('displayName', name);
+    if (avatarPath != null) await prefs.setString('avatarPath', avatarPath);
   }
 
-  Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo data) {
-    return <String, dynamic>{
-      'name': data.name,
-      'systemName': data.systemName,
-      'systemVersion': data.systemVersion,
-      'model': data.model,
-      'localizedModel': data.localizedModel,
-      'isPhysicalDevice': data.isPhysicalDevice,
-      'identifierForVendor': data.identifierForVendor,
-    };
-  }
+
+
 
   @override
   Widget build(BuildContext context) {
-    final email = widget.email;
+  final email = widget.email;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile', style: GoogleFonts.montserrat()),
+        title: Text('Edit Profile', style: GoogleFonts.poppins()),
         backgroundColor: const Color.fromRGBO(255, 187, 214, 1),
       ),
-      body: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.pink.shade200, Colors.pink.shade400],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Column(
-              children: [
-                GFAvatar(
-                  radius: 56,
-                  backgroundImage: const AssetImage('assets/profil.png'),
-                  shape: GFAvatarShape.standard,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  _displayNameFromEmail(email),
-                  style: GoogleFonts.montserrat(
-                      fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-                const SizedBox(height: 6),
-                Text(email, style: GoogleFonts.montserrat(color: Colors.white70)),
-              ],
-            ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: _EditProfileForm(
+            initialName: _displayName ?? _displayNameFromEmail(email),
+            initialEmail: email,
+            initialAvatar: _avatarPath ?? 'assets/profil.png',
+            onSave: (name, emailValue, avatar) async {
+              setState(() {
+                _displayName = name;
+                _avatarPath = avatar;
+              });
+              await _saveProfile(name: name, avatarPath: avatar);
+              // If email persistence is desired, save it too
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('email', emailValue);
+              // After save, pop back or show snackbar
+              if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profil disimpan')));
+            },
           ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: ListView(
-              children: [
-                GFListTile(
-                  avatar: const Icon(Icons.notifications_none, color: Colors.pinkAccent),
-                  titleText: 'Notifications',
-                  onTap: () {},
-                ),
-                GFListTile(
-                  avatar: const Icon(Icons.chat_bubble_outline, color: Colors.pinkAccent),
-                  titleText: 'Reviews',
-                  onTap: () {},
-                ),
-                GFListTile(
-                  avatar: const Icon(Icons.payment_outlined, color: Colors.pinkAccent),
-                  titleText: 'Payments',
-                  onTap: () {},
-                ),
-                GFListTile(
-                  avatar: const Icon(Icons.settings_outlined, color: Colors.pinkAccent),
-                  titleText: 'Settings',
-                  onTap: () {},
-                ),
-                const Divider(),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Text('Device info', style: GoogleFonts.montserrat(fontWeight: FontWeight.w600)),
-                ),
-                if (_loadingDevice)
-                  const Center(child: Padding(
-                    padding: EdgeInsets.all(12.0),
-                    child: CircularProgressIndicator(),
-                  ))
-                else if (_deviceData.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text('No device info available', style: GoogleFonts.montserrat()),
-                  )
-                else ..._deviceData.entries.map((e) => ListTile(
-                      title: Text(e.key),
-                      subtitle: Text('${e.value}'),
-                    )),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: GFButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                );
-              },
-              text: 'Logout',
-              icon: const Icon(Icons.power_settings_new, color: Colors.white),
-              color: Colors.pink.shade100,
-              blockButton: true,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
+
+
 
   String _displayNameFromEmail(String email) {
     if (email.isEmpty) return 'Guest';

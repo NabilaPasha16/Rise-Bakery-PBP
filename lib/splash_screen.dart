@@ -95,7 +95,7 @@ class _SplashScreenState extends State<SplashScreen>
                     const SizedBox(height: 24),
                     Text(
                       "PILACAKE",
-                      style: GoogleFonts.fredoka(
+                      style: GoogleFonts.poppins(
                         fontSize: 42,
                         color: Colors.pink[800],
                         fontWeight: FontWeight.w700,

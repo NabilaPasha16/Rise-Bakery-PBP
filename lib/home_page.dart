@@ -1,19 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
-import 'package:intl/intl.dart';
 import 'model/cake.dart';
 import 'model/cake_category.dart';
-import 'detail_page.dart';
 import 'category_page.dart';
-import 'cart_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'login_page.dart';
+import 'cart_page.dart';
+import 'profile_page.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final String email;
 
-  HomePage({super.key, required this.email});
+  const HomePage({super.key, required this.email});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  // device info
+  final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
+  Map<String, dynamic> _deviceData = {};
+  bool _loadingDevice = true;
+  // profile header state (loaded from SharedPreferences)
+  String? _displayName;
+  String? _avatarPath;
 
   // Daftar kategori kue
   final List<CakeCategory> categories = [
@@ -97,6 +113,103 @@ class HomePage extends StatelessWidget {
 ];
 
   @override
+  void initState() {
+    super.initState();
+    _initDeviceInfo();
+    _loadProfile();
+  }
+
+  // Load persisted profile name/avatar from SharedPreferences (if user edited profile)
+  Future<void> _loadProfile() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final storedName = prefs.getString('displayName');
+      final storedAvatar = prefs.getString('avatarPath');
+      setState(() {
+        if (storedName != null && storedName.isNotEmpty) {
+          _displayName = storedName;
+        }
+        if (storedAvatar != null && storedAvatar.isNotEmpty) {
+          _avatarPath = storedAvatar;
+        }
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _initDeviceInfo() async {
+    try {
+      if (kIsWeb) {
+        final info = await _deviceInfo.webBrowserInfo;
+        setState(() => _deviceData = {
+              'browser': info.browserName.toString(),
+              'userAgent': info.userAgent ?? '',
+              'appVersion': info.appVersion ?? '',
+              'platform': info.platform ?? '',
+              'vendor': info.vendor ?? '',
+            });
+      } else if (Platform.isAndroid) {
+        final info = await _deviceInfo.androidInfo;
+        setState(() => _deviceData = {
+              'brand': info.brand,
+              'model': info.model,
+              'device': info.device,
+              'manufacturer': info.manufacturer,
+              'androidVersion': info.version.release,
+              'sdkInt': info.version.sdkInt,
+              'isPhysicalDevice': info.isPhysicalDevice,
+            });
+      } else if (Platform.isIOS) {
+        final info = await _deviceInfo.iosInfo;
+        setState(() => _deviceData = {
+              'name': info.name,
+              'systemName': info.systemName,
+              'systemVersion': info.systemVersion,
+              'model': info.model,
+              'localizedModel': info.localizedModel,
+              'isPhysicalDevice': info.isPhysicalDevice,
+              'identifierForVendor': info.identifierForVendor,
+            });
+      } else {
+        setState(() => _deviceData = {
+              'os': Platform.operatingSystem,
+              'osVersion': Platform.operatingSystemVersion,
+            });
+      }
+      setState(() => _loadingDevice = false);
+    } catch (e) {
+      setState(() {
+        _deviceData = {'error': 'Failed to get device info: $e'};
+        _loadingDevice = false;
+      });
+    }
+  }
+
+  String _deviceModelDisplay() {
+    final model = _deviceData['model'] ?? _deviceData['device'] ?? _deviceData['name'] ?? '';
+    final brand = _deviceData['brand'] ?? _deviceData['manufacturer'] ?? '';
+    final candidate = '${brand.toString()} ${model.toString()}'.trim();
+    if (candidate.isEmpty) return 'Tidak diketahui';
+    return model.toString().isNotEmpty ? model.toString() : candidate;
+  }
+
+  String _deviceBrandDisplay() {
+    final brand = _deviceData['brand'] ?? _deviceData['manufacturer'] ?? '';
+    if (brand == null || brand.toString().trim().isEmpty) return 'Tidak diketahui';
+    return brand.toString();
+  }
+
+  String _deviceVersionDisplay() {
+    final v = _deviceData['systemVersion'] ?? _deviceData['androidVersion'] ?? _deviceData['osVersion'] ?? _deviceData['appVersion'] ?? _deviceData['userAgent'] ?? '';
+    if (v == null || v.toString().trim().isEmpty) {
+      try {
+        if (!kIsWeb) return Platform.operatingSystemVersion;
+      } catch (_) {}
+      return 'Tidak diketahui';
+    }
+    return v.toString();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: Drawer(
@@ -117,84 +230,71 @@ class HomePage extends StatelessWidget {
                   children: [
                     GFAvatar(
                       radius: 42,
-                      backgroundImage: AssetImage('assets/profil.png'),
+                      backgroundImage: _avatarPath != null && !_avatarPath!.startsWith('http')
+                          ? AssetImage(_avatarPath!)
+                          : (_avatarPath != null ? NetworkImage(_avatarPath!) : const AssetImage('assets/profil.png')) as ImageProvider,
                       shape: GFAvatarShape.standard,
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      _displayNameFromEmail(email),
-                      style: GoogleFonts.montserrat(
+                      _displayName ?? _displayNameFromEmail(widget.email),
+                      style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      email,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 13,
-                        color: Colors.white70,
-                      ),
-                    ),
+                    const SizedBox(height: 12),
                   ],
-                ),
-              ),
-              // Card yang dapat diklik untuk membuka Clairmont Cake di browser
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () => _openClairmont(context),
-                  child: Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 4,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.language, color: Colors.pinkAccent),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Kunjungi Clairmont Cake',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          const Icon(Icons.open_in_new, color: Colors.grey),
-                        ],
-                      ),
-                    ),
-                  ),
                 ),
               ),
               Expanded(
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
-                    GFListTile(
-                      avatar: const Icon(Icons.notifications_none, color: Colors.pinkAccent),
-                      titleText: 'Notifications',
-                      subTitleText: '',
-                      onTap: () {},
+                    ListTile(
+                      leading: const Icon(Icons.person, color: Colors.pinkAccent),
+                      title: const Text('Profil'),
+                      onTap: () async {
+                        Navigator.pop(context);
+                        await Navigator.push(context, MaterialPageRoute(builder: (ctx) => ProfilePage(email: widget.email)));
+                        // refresh profile header after returning
+                        await _loadProfile();
+                      },
                     ),
-                    GFListTile(
-                      avatar: const Icon(Icons.chat_bubble_outline, color: Colors.pinkAccent),
-                      titleText: 'Reviews',
-                      onTap: () {},
+                    // Settings removed per user request
+                    ListTile(
+                      leading: const Icon(Icons.info_outline, color: Colors.pinkAccent),
+                      title: const Text('Tentang PILACAKE'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        showDialog(context: context, builder: (ctx) => AlertDialog(
+                          title: const Text('Tentang PILACAKE'),
+                          content: const Text('Yuk, coba rasa baru tiap minggunya! 💕'),
+                          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Tutup'))],
+                        ));
+                      },
                     ),
-                    GFListTile(
-                      avatar: const Icon(Icons.payment_outlined, color: Colors.pinkAccent),
-                      titleText: 'Payments',
-                      onTap: () {},
+                    const Divider(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Text('Info Perangkat:', style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.blue)),
                     ),
-                    GFListTile(
-                      avatar: const Icon(Icons.settings_outlined, color: Colors.pinkAccent),
-                      titleText: 'Settings',
-                      onTap: () {},
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                      child: _loadingDevice
+                          ? const SizedBox(height: 48, child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator())))
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Model: ${_deviceModelDisplay()}', style: GoogleFonts.poppins(fontSize: 13)),
+                                const SizedBox(height: 6),
+                                Text('Brand: ${_deviceBrandDisplay()}', style: GoogleFonts.poppins(fontSize: 13)),
+                                const SizedBox(height: 6),
+                                Text('Versi: ${_deviceVersionDisplay()}', style: GoogleFonts.poppins(fontSize: 13)),
+                                const SizedBox(height: 12),
+                              ],
+                            ),
                     ),
                   ],
                 ),
@@ -218,35 +318,36 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-
       appBar: AppBar(
-        title: Center(
-          child: Text(
-            'PILACAKE',
-            style: GoogleFonts.fredoka(
-              fontSize: 45,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 2.0,
-              color: Colors.white,
-            ),
+        centerTitle: true,
+        title: Text(
+          'PILACAKE',
+          style: GoogleFonts.poppins(
+            fontSize: 36,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2.0,
+            color: Colors.white,
           ),
         ),
         backgroundColor: const Color.fromRGBO(255, 187, 214, 1),
         elevation: 6,
-        toolbarHeight: 100,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const LoginPage(),
-                ),
-              );
-            },
-          ),
-        ],
+        toolbarHeight: 80,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: TextButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CartPage()),
+                  );
+                },
+                icon: const Icon(Icons.shopping_cart, color: Colors.white, size: 20),
+                label: Text('KERANJANG🛒', style: GoogleFonts.poppins(color: Colors.white)),
+                style: TextButton.styleFrom(foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12)),
+              ),
+            ),
+          ],
       ),
       body: Stack(
         children: [
@@ -258,7 +359,7 @@ class HomePage extends StatelessWidget {
           ),
           Positioned.fill(
             child: Container(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withAlpha((0.7 * 255).round()),
             ),
           ),
           Column(
@@ -268,8 +369,7 @@ class HomePage extends StatelessWidget {
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.only(bottom: 12, top: 16),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Colors.pink.shade200, Colors.pink.shade400],
@@ -279,7 +379,7 @@ class HomePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(32),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.pink.shade100.withOpacity(0.4),
+                      color: Colors.pink.shade100.withAlpha((0.4 * 255).round()),
                       blurRadius: 16,
                       offset: const Offset(0, 8),
                     ),
@@ -287,15 +387,15 @@ class HomePage extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'Selamat datang, $email',
-                    style: GoogleFonts.montserrat(
+                    'Selamat datang, ${widget.email}',
+                    style: GoogleFonts.poppins(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       letterSpacing: 1.2,
                       shadows: [
                         Shadow(
-                          color: Colors.pink.shade700.withOpacity(0.3),
+                          color: Colors.pink.shade700.withAlpha((0.3 * 255).round()),
                           blurRadius: 6,
                           offset: const Offset(2, 2),
                         ),
@@ -304,176 +404,64 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
-              GFCarousel(
-  autoPlay: true,
-  viewportFraction: 0.9,
-  height: 160,
-  activeIndicator: Colors.pinkAccent,
-  passiveIndicator: Colors.grey.shade400,
-  autoPlayInterval: const Duration(seconds: 3),
-  items: [
-    // Banner 1
-    Container(
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        image: const DecorationImage(
-          image: AssetImage('assets/burncheesecake_matcha.png'),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Align(
-        alignment: Alignment.bottomLeft,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.5),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "🎉 BurnCheeseCake Matcha",
-                style: GoogleFonts.montserrat(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+              // Carousel and accordion
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Column(
+                  children: [
+                    GFCarousel(
+                      autoPlay: true,
+                      viewportFraction: 0.9,
+                      height: 160,
+                      activeIndicator: Colors.pinkAccent,
+                      passiveIndicator: Colors.grey.shade400,
+                      autoPlayInterval: const Duration(seconds: 3),
+                      items: [
+                        // Banner 1
+                        _buildBanner('assets/promomatcha.png', 'MILECREPES MATCHA', 'Cobain Sekarang'),
+                        _buildBanner('assets/promotarcakecoklat.png', 'TAR CAKE COKLAT Lumer', 'Spesial Launching!'),
+                        _buildBanner('assets/promoburncheese.png', 'BURNCHEESE CAKE MATCHA', 'SPESIAL 10.10'),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    // 'Tentang PILACAKE' dipindah ke Drawer
+                    const SizedBox(height: 8),
+                    // Card untuk membuka Clairmont Cake di browser
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () => _openClairmont(context),
+                        child: Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 4,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.language, color: Colors.pinkAccent),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Kunjungi Situs Kue 🍰',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                const Icon(Icons.open_in_new, color: Colors.grey),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                "Diskon 15% minggu ini aja 🍵",
-                style: GoogleFonts.montserrat(
-                  color: Colors.white70,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-
-    // Banner 2
-    Container(
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        image: const DecorationImage(
-          image: AssetImage('assets/tarcake_coklat.png'),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Align(
-        alignment: Alignment.bottomLeft,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.5),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "🍫 Tar Cake Coklat Lumer",
-                style: GoogleFonts.montserrat(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "Nikmati sensasi coklat premium!",
-                style: GoogleFonts.montserrat(
-                  color: Colors.white70,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-
-    // Banner 3
-    Container(
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        image: const DecorationImage(
-          image: AssetImage('assets/milecrepes_matcha.png'),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Align(
-        alignment: Alignment.bottomLeft,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.5),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "🍰 MileCrepes Matcha",
-                style: GoogleFonts.montserrat(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "Beli 2 gratis 1 minggu ini 💚",
-                style: GoogleFonts.montserrat(
-                  color: Colors.white70,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  ],
-),
-
-GFAccordion(
-  title: "Tentang PILACAKE 🍰",
-  content:
-      "Setiap kue dibuat handmade dengan bahan segar dan cinta. Yuk, coba rasa baru tiap minggunya! 💕",
-  collapsedIcon: const Icon(Icons.add_circle_outline, color: Colors.pinkAccent),
-  expandedIcon: const Icon(Icons.remove_circle_outline, color: Colors.pinkAccent),
-  titleBorderRadius: BorderRadius.circular(10),
-  margin: const EdgeInsets.symmetric(horizontal: 16),
-  textStyle: GoogleFonts.montserrat(
-    fontWeight: FontWeight.w600,
-    fontSize: 14,
-    color: Colors.pinkAccent,
-  ),
-)
-,
-
+              const SizedBox(height: 8),
+              // Category list
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(12),
@@ -485,34 +473,29 @@ GFAccordion(
                       cakeList = burnCheeseCakeList;
                     } else if (category.name == "Tar Cake") {
                       cakeList = tarCakeList;
-
                     } else if (category.name == "MileCrepes") {
                       cakeList = mileCrepesList;
-                    }
-                    
-                    else {
-                      cakeList = specialCakeList ;
+                    } else {
+                      cakeList = specialCakeList;
                     }
 
                     return Card(
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 16), // kotak lebih besar
+                      margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                       elevation: 6,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                            vertical: 20, horizontal: 16), // lebih lega
+                        contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                         leading: CircleAvatar(
                           backgroundImage: AssetImage(category.assetImage),
-                          radius: 36, // gambar lebih besar
+                          radius: 36,
                         ),
                         title: Text(
                           category.name,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 20, // font lebih besar
+                            fontSize: 20,
                             color: Colors.pink.shade700,
                           ),
                         ),
@@ -523,8 +506,7 @@ GFAccordion(
                             color: Colors.grey[700],
                           ),
                         ),
-                        trailing:
-                            const Icon(Icons.arrow_forward_ios, size: 22),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 22),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -542,6 +524,75 @@ GFAccordion(
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBanner(String assetPath, String title, String subtitle) {
+    return Container(
+      margin: const EdgeInsets.all(8),
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              assetPath,
+              fit: BoxFit.cover,
+              errorBuilder: (ctx, error, stack) {
+                // Fallback placeholder when asset missing
+                return Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.pink.shade300, Colors.pink.shade600],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: Center(
+                    child: Icon(Icons.local_offer, size: 64, color: Colors.white24),
+                  ),
+                );
+              },
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.black.withAlpha((0.5 * 255).round()),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.montserrat(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.montserrat(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'utils/formatters.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animated_rating_stars/animated_rating_stars.dart';
-
 import 'model/cake.dart';
-import 'cart_page.dart';
+import 'utils/cart_manager.dart';
 
 class DetailPage extends StatelessWidget {
   final Cake cake;
@@ -39,7 +38,7 @@ class DetailPage extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               cake.name,
-              style: GoogleFonts.montserrat(fontSize: 24, fontWeight: FontWeight.bold),
+              style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -56,7 +55,7 @@ class DetailPage extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               "Harga: ${formatRupiah(cake.price)}",
-              style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+              style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -84,7 +83,7 @@ class DetailPage extends StatelessWidget {
             if (cake is SpecialCake)
               Text(
                 "Fitur Spesial: ${(cake as SpecialCake).specialFeature}",
-                style: GoogleFonts.montserrat(color: Colors.orange),
+                style: GoogleFonts.poppins(color: Colors.orange),
                 textAlign: TextAlign.center,
               ),
           ],
@@ -103,12 +102,25 @@ class DetailPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () {
-                  // Direct buy: open CartPage in buy-now mode
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => CartPage(buyNowItem: cake)),
+                onPressed: () async {
+                  // Direct buy: show confirmation and perform purchase immediately
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Konfirmasi Pembelian'),
+                      content: Text('Total: ${formatRupiah(cake.price)}. Lanjutkan pembayaran?'),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
+                        TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Bayar')),
+                      ],
+                    ),
                   );
+
+                  if (confirm == true) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pembelian berhasil! Terima kasih.')));
+                    Navigator.pop(context); // go back after purchase
+                  }
                 },
                 child: const Text(
                   "Beli",
@@ -128,8 +140,9 @@ class DetailPage extends StatelessWidget {
                   side: BorderSide(color: Colors.pink.shade200),
                 ),
                 onPressed: () {
-                  // Open the CartPage with this single item
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => CartPage(items: [cake])));
+                  // Add to shared cart instead of navigating immediately
+                  CartManager().add(cake);
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${cake.name} ditambahkan ke keranjang')));
                 },
                 child: const Text('Masukan keranjang', style: TextStyle(fontSize: 16)),
               ),
