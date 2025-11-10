@@ -5,7 +5,7 @@ import 'package:getwidget/getwidget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-
+import 'package:sizer/sizer.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -63,7 +63,11 @@ class _LoginPageState extends State<LoginPage> {
     // Require that the account exists in stored users
     if (!_registeredUsers.containsKey(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Akun tidak ditemukan. Silakan register terlebih dahulu.")),
+        const SnackBar(
+          content: Text(
+            "Akun tidak ditemukan. Silakan register terlebih dahulu.",
+          ),
+        ),
       );
       return;
     }
@@ -76,14 +80,12 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Login berhasil sebagai $email")),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("Login berhasil sebagai $email")));
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => HomePage(email: email),
-      ),
+      MaterialPageRoute(builder: (context) => HomePage(email: email)),
     );
   }
 
@@ -113,7 +115,9 @@ class _LoginPageState extends State<LoginPage> {
             child: SingleChildScrollView(
               child: Container(
                 width: formWidth,
-                padding: const EdgeInsets.all(32),
+                padding: EdgeInsets.all(
+                  4.w,
+                ), // Using percentage of screen width
                 decoration: BoxDecoration(
                   color: Colors.white.withAlpha((0.92 * 255).round()),
                   borderRadius: BorderRadius.circular(32),
@@ -128,10 +132,8 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(
-                      'assets/logo.png',
-                      height: 120,
-                    ),
+                    SizedBox(height: 10.h), // Using percentage of screen height
+                    Image.asset('assets/logo.png', height: 20.h, width: 40.w),
                     SizedBox(height: 24),
                     Text(
                       "Selamat Datang di RISE BAKERY",
@@ -146,7 +148,7 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 24),
                     TextField(
                       controller: emailController,
-                        style: GoogleFonts.poppins(fontSize: 18),
+                      style: GoogleFonts.poppins(fontSize: 18),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.pink[50],
@@ -161,8 +163,10 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide:
-                              BorderSide(color: Colors.pink[600]!, width: 2),
+                          borderSide: BorderSide(
+                            color: Colors.pink[600]!,
+                            width: 2,
+                          ),
                         ),
                       ),
                     ),
@@ -184,8 +188,10 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide:
-                              BorderSide(color: Colors.pink[600]!, width: 2),
+                          borderSide: BorderSide(
+                            color: Colors.pink[600]!,
+                            width: 2,
+                          ),
                         ),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -201,18 +207,20 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 28),
                     GFButton(
-                    onPressed: _login,
-                    text: "Login",
-                    icon: const Icon(Icons.login, color: Colors.white),
-                    fullWidthButton: true,
-                    size: GFSize.LARGE,
-                    color: const Color.fromARGB(255, 237, 226, 125),
-                    elevation: 6,
-                    shape: GFButtonShape.pills,     // bentuk rounded pills
+                      onPressed: _login,
+                      text: "Login",
+                      icon: const Icon(Icons.login, color: Colors.white),
+                      fullWidthButton: true,
+                      size: GFSize.LARGE,
+                      color: const Color.fromARGB(255, 237, 226, 125),
+                      elevation: 6,
+                      shape: GFButtonShape.pills, // bentuk rounded pills
                       textStyle: GoogleFonts.poppins(
-                    fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white
-  ),
-),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
 
                     const SizedBox(height: 12),
                     TextButton(

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'bloc/cakes_cubit.dart';
+import 'services/api_service.dart';
 import 'pages/splash_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -10,9 +15,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
+    return Sizer(
+      builder: (context, orientation, deviceType) {
+        return BlocProvider(
+          create: (context) => CakesCubit(apiService: ApiService()),
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+              visualDensity: VisualDensity.adaptivePlatformDensity,
+            ),
+            home: const SplashScreen(),
+          ),
+        );
+      },
     );
   }
 }
