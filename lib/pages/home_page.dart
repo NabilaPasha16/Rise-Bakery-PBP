@@ -14,6 +14,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class HomePage extends StatefulWidget {
   final String email;
@@ -219,6 +220,51 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                   const Divider(),
+                  // Informasi Device
+                  if (!_loadingDevice) ...[
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.pink.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Informasi Perangkat',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.pink.shade700,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          if (_deviceData.containsKey('model'))
+                            Text('Model: ${_deviceData['model']}',
+                                style: GoogleFonts.poppins(fontSize: 14)),
+                          if (_deviceData.containsKey('brand'))
+                            Text('Merek: ${_deviceData['brand']}',
+                                style: GoogleFonts.poppins(fontSize: 14)),
+                          if (_deviceData.containsKey('androidVersion'))
+                            Text('Android: ${_deviceData['androidVersion']}',
+                                style: GoogleFonts.poppins(fontSize: 14)),
+                          if (_deviceData.containsKey('manufacturer'))
+                            Text('Pembuat: ${_deviceData['manufacturer']}',
+                                style: GoogleFonts.poppins(fontSize: 14)),
+                          // Info untuk web browser
+                          if (_deviceData.containsKey('browser'))
+                            Text('Browser: ${_deviceData['browser']}',
+                                style: GoogleFonts.poppins(fontSize: 14)),
+                          if (_deviceData.containsKey('platform'))
+                            Text('Platform: ${_deviceData['platform']}',
+                                style: GoogleFonts.poppins(fontSize: 14)),
+                        ],
+                      ),
+                    ),
+                    const Divider(),
+                  ],
                 ],
               ),
             ),
