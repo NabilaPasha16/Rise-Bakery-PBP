@@ -71,7 +71,7 @@ class _EditProfileFormState extends State<_EditProfileForm> {
           const SizedBox(height: 8),
           TextButton.icon(
             onPressed: () async {
-              // Quick input dialog for avatar path
+              
               final ctrl = TextEditingController(text: _avatarCtrl.text);
               final result = await showDialog<String?>(context: context, builder: (ctx) => AlertDialog(
                 title: const Text('Change Photo (asset path or URL)'),
@@ -135,12 +135,12 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   // no device info state needed
   String? _displayName;
-  String? _avatarPath; // either asset path or stored path
+  String? _avatarPath; 
 
   @override
   void initState() {
     super.initState();
-    // removed device info init
+    
     _loadProfile();
   }
 
@@ -182,10 +182,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 _avatarPath = avatar;
               });
               await _saveProfile(name: name, avatarPath: avatar);
-              // If email persistence is desired, save it too
+              
               final prefs = await SharedPreferences.getInstance();
               await prefs.setString('email', emailValue);
-              // After save, pop back or show snackbar
+              
               if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profil disimpan')));
             },
           ),

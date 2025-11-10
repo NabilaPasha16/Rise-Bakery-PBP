@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
-// Registered users are persisted in SharedPreferences as a JSON map under key 'registered_users'
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -135,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     SizedBox(height: 24),
                     Text(
-                      "Selamat Datang di PILACAKE",
+                      "Selamat Datang di RISE BAKERY",
                       style: GoogleFonts.poppins(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,

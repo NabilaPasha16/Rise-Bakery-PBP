@@ -38,7 +38,7 @@ class _CategoryPageState extends State<CategoryPage> {
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             elevation: 3,
             child: InkWell(
-              // klik seluruh card -> buka halaman detail
+              
               onTap: () {
                 Navigator.push(
                   context,
@@ -88,7 +88,7 @@ class _CategoryPageState extends State<CategoryPage> {
                       ),
                     ),
 
-                    // Tombol Beli & Keranjang sejajar
+                    
                     Column(
                       children: [
                         ElevatedButton(

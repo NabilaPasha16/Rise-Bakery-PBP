@@ -296,7 +296,7 @@ class _HomePageState extends State<HomePage> {
     return AppBar(
       centerTitle: true,
       title: Text(
-        'PILACAKE',
+        'RISE BAKERY',
         style: GoogleFonts.poppins(
           fontSize: 36,
           fontWeight: FontWeight.bold,
