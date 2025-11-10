@@ -98,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      "Selamat datang di PILACAKE!",
+                      "Selamat datang di RISE BAKERY",
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
@@ -107,7 +107,7 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      "Nabila Pasha Hamidah",
+                      "KELOMPOK 5",
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
                         fontSize: 14,
