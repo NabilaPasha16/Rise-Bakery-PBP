@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'model/cake.dart';
-import 'utils/formatters.dart';
-import 'utils/cart_manager.dart';
+import '../model/cake.dart';
+import '../utils/formatters.dart';
+import '../utils/cart_manager.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key, this.items, this.buyNowItem});

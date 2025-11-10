@@ -1,11 +1,29 @@
 import 'package:flutter/material.dart';
-import 'utils/formatters.dart';
+import '../utils/formatters.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animated_rating_stars/animated_rating_stars.dart';
-import 'model/cake.dart';
-import 'utils/cart_manager.dart';
+import '../model/cake.dart';
+import '../utils/cart_manager.dart';
 
 class DetailPage extends StatelessWidget {
+  static Widget _buildImage(Cake cake) {
+    final img = cake.imagePath;
+    if (img.isEmpty) {
+      return const SizedBox(
+        width: 220,
+        height: 220,
+        child: Icon(Icons.image_not_supported, color: Colors.pinkAccent, size: 64),
+      );
+    }
+    final isNetwork = img.startsWith('http://') || img.startsWith('https://');
+    return SizedBox(
+      width: 220,
+      height: 220,
+      child: isNetwork
+          ? Image.network(img, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 64))
+          : Image.asset(img, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 64)),
+    );
+  }
   final Cake cake;
   const DetailPage({super.key, required this.cake});
 
@@ -27,12 +45,7 @@ class DetailPage extends StatelessWidget {
             Center(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  cake.imagePath,
-                  width: 220,
-                  height: 220,
-                  fit: BoxFit.cover,
-                ),
+                child: _buildImage(cake),
               ),
             ),
             const SizedBox(height: 16),

@@ -5,7 +5,7 @@ import '../bloc/cakes_cubit.dart';
 import '../bloc/cakes_state.dart';
 import '../model/cake.dart';
 import '../utils/formatters.dart';
-import '../detail_page.dart';
+import 'detail_page.dart';
 
 class ApiCakesPage extends StatelessWidget {
   final ApiService apiService;

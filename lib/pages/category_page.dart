@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'utils/formatters.dart';
+import '../utils/formatters.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'model/cake.dart';
+import '../model/cake.dart';
 import 'detail_page.dart';
-import 'utils/cart_manager.dart';
+import '../utils/cart_manager.dart';
 
 class CategoryPage extends StatefulWidget {
   final String category;

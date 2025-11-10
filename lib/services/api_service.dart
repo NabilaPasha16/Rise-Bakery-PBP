@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../model/cake.dart';
 import '../model/cake_category.dart';
+import 'dart:math';
 
 class ApiService {
   final Dio _dio;
@@ -50,7 +51,7 @@ class ApiService {
       return meals.map<Cake>((m) {
         return Cake(
           m['strMeal'] ?? 'Kue Tanpa Nama',
-          0, // TheMealDB gak ada harga, kamu bisa isi manual nanti
+          (15000 + Random().nextInt(20000)) as double, // harga antara 15rb-35rb
           m['strMealThumb'] ?? '',
           description: m['strInstructions'] ?? '',
         );
