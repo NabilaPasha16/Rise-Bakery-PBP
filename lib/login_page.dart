@@ -106,15 +106,10 @@ class _LoginPageState extends State<LoginPage> {
     double width = MediaQuery.of(context).size.width;
     double formWidth = width > 600 ? 420 : width * 0.95;
     return Scaffold(
-      backgroundColor: Colors.pink[50],
+      backgroundColor: const Color(0xFFFFF8F0),
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/background.jpg',
-              fit: BoxFit.cover,
-            ),
-          ),
+          // Image background overlay removed — using cream background only
           Center(
             child: SingleChildScrollView(
               child: Container(

@@ -63,22 +63,17 @@ class _SplashScreenState extends State<SplashScreen>
             width: double.infinity,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
+                // changed to light brown / caramel gradient
                 colors: [
-                  Color(0xFFFFD1DC),
-                  Color(0xFFFFFFFF),
+                  Color(0xFFD2A679), // caramel
+                  Color(0xFFFFF8F0), // light cream
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
             ),
           ),
-          // Image background overlay
-          Positioned.fill(
-            child: Image.asset(
-              'assets/background.jpg',
-              fit: BoxFit.cover,
-            ),
-          ),
+          // Image background overlay removed — using gradient only
           // Content utama (logo + teks)
           Center(
             child: FadeTransition(

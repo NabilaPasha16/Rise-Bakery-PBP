@@ -30,7 +30,7 @@ class _RegisterPageState extends State<RegisterPage> {
     final width = MediaQuery.of(context).size.width;
     final formWidth = width > 600 ? 420.0 : width * 0.95;
     return Scaffold(
-      backgroundColor: const Color(0xFFFDEFF4),
+      backgroundColor: const Color(0xFFFFF8F0),
       appBar: AppBar(
         title: Text('Register', style: GoogleFonts.poppins(color: Colors.pink[400])),
         backgroundColor: Colors.white,
