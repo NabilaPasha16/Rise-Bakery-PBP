@@ -3,7 +3,8 @@ import '../utils/formatters.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../model/cake.dart';
 import 'detail_page.dart';
-import '../utils/cart_manager.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../bloc/cart_cubit.dart';
 
 class CategoryPage extends StatefulWidget {
   final String category;
@@ -52,14 +53,15 @@ class _CategoryPageState extends State<CategoryPage> {
                 padding: const EdgeInsets.all(8),
                 child: Row(
                   children: [
-                    // Gambar kue
+                    // Gambar kue (support network URLs)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(
-                        cake.imagePath,
+                      child: SizedBox(
                         width: 60,
                         height: 60,
-                        fit: BoxFit.cover,
+                        child: (cake.imagePath.startsWith('http://') || cake.imagePath.startsWith('https://'))
+                            ? Image.network(cake.imagePath, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image))
+                            : Image.asset(cake.imagePath, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image)),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -127,7 +129,7 @@ class _CategoryPageState extends State<CategoryPage> {
                         const SizedBox(height: 6),
                         OutlinedButton(
                           onPressed: () {
-                            CartManager().add(cake);
+                            context.read<CartCubit>().add(cake);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('${cake.name} ditambahkan ke keranjang'),

@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'bloc/cakes_cubit.dart';
+import 'bloc/cart_cubit.dart';
+import 'bloc/home_cubit.dart';
+import 'bloc/category_cubit.dart';
+import 'bloc/profile_cubit.dart';
 import 'services/api_service.dart';
 import 'pages/splash_screen.dart';
 
@@ -17,8 +21,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Sizer(
       builder: (context, orientation, deviceType) {
-        return BlocProvider(
-          create: (context) => CakesCubit(apiService: ApiService()),
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (context) => CakesCubit(apiService: ApiService())),
+            BlocProvider(create: (context) => CartCubit()),
+            BlocProvider(create: (context) => HomeCubit(apiService: ApiService())),
+            BlocProvider(create: (context) => CategoryCubit(apiService: ApiService())),
+            BlocProvider(create: (context) => ProfileCubit()),
+          ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: ThemeData(

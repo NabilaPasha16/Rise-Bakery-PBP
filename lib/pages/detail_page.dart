@@ -3,7 +3,8 @@ import '../utils/formatters.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animated_rating_stars/animated_rating_stars.dart';
 import '../model/cake.dart';
-import '../utils/cart_manager.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../bloc/cart_cubit.dart';
 
 class DetailPage extends StatelessWidget {
   static Widget _buildImage(Cake cake) {
@@ -153,8 +154,8 @@ class DetailPage extends StatelessWidget {
                   side: BorderSide(color: Colors.pink.shade200),
                 ),
                 onPressed: () {
-                  // Add to shared cart instead of navigating immediately
-                  CartManager().add(cake);
+                  // Add to shared cart via CartCubit
+                  context.read<CartCubit>().add(cake);
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${cake.name} ditambahkan ke keranjang')));
                 },
                 child: const Text('Masukan keranjang', style: TextStyle(fontSize: 16)),

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../model/cake.dart';
 import '../utils/formatters.dart';
-import '../utils/cart_manager.dart';
+import 'dart:async';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../bloc/cart_cubit.dart';
+import '../bloc/cart_state.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key, this.items, this.buyNowItem});
@@ -17,7 +20,9 @@ class CartPage extends StatefulWidget {
 class _CartPageState extends State<CartPage> {
   late List<Cake> _items;
   late List<bool> _selected;
-  late final CartManager _cartManager;
+  // cart items kept in local view; when not provided, we sync with CartCubit
+  // CartCubit instance is provided globally in main.dart
+  StreamSubscription<CartState>? _cartSub;
 
   double get totalPrice => widget.buyNowItem != null
       ? widget.buyNowItem!.price
@@ -26,30 +31,48 @@ class _CartPageState extends State<CartPage> {
   @override
   void initState() {
     super.initState();
-    _cartManager = CartManager();
     _items = widget.items != null ? List<Cake>.from(widget.items!) : <Cake>[];
     if (widget.items == null && widget.buyNowItem == null) {
-      _items = List<Cake>.from(_cartManager.items);
-      _cartManager.addListener(_onCartChanged);
+      // sync initial items from CartCubit
+      final cubit = context.read<CartCubit>();
+      _items = List<Cake>.from(cubit.items);
+      _cartSub = cubit.stream.listen((state) {
+        if (!mounted) return;
+        setState(() {
+          _items = List<Cake>.from(state.items);
+          _selected = List<bool>.filled(_items.length, true);
+        });
+      });
     }
     _selected = List<bool>.filled(_items.length, true);
   }
 
+  Widget _buildImage(Cake item, {double width = 56, double height = 56}) {
+    final img = item.imagePath;
+    if (img.isEmpty) {
+      return SizedBox(
+        width: width,
+        height: height,
+        child: Icon(Icons.image_not_supported, color: Colors.grey[400], size: width * 0.6),
+      );
+    }
+    final isNetwork = img.startsWith('http://') || img.startsWith('https://');
+    return SizedBox(
+      width: width,
+      height: height,
+      child: isNetwork
+          ? Image.network(img, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image))
+          : Image.asset(img, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image)),
+    );
+  }
+
   @override
   void dispose() {
-    try {
-      _cartManager.removeListener(_onCartChanged);
-    } catch (_) {}
+    _cartSub?.cancel();
     super.dispose();
   }
 
-  void _onCartChanged() {
-    if (!mounted) return;
-    setState(() {
-      _items = List<Cake>.from(_cartManager.items);
-      _selected = List<bool>.filled(_items.length, true);
-    });
-  }
+  // legacy hook removed; we now subscribe to CartCubit's stream in initState
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +94,7 @@ class _CartPageState extends State<CartPage> {
               icon: const Icon(Icons.delete_forever),
               tooltip: "Kosongkan Keranjang",
               onPressed: () {
-                _cartManager.clear();
+                context.read<CartCubit>().clear();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text("Keranjang dikosongkan."),
@@ -113,12 +136,7 @@ class _CartPageState extends State<CartPage> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    item.imagePath,
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.cover,
-                  ),
+                  child: _buildImage(item, width: 80, height: 80),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -200,12 +218,7 @@ class _CartPageState extends State<CartPage> {
                 const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
             leading: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                item.imagePath,
-                width: 64,
-                height: 64,
-                fit: BoxFit.cover,
-              ),
+              child: _buildImage(item, width: 64, height: 64),
             ),
             title: Text(item.name,
                 style: const TextStyle(
@@ -243,7 +256,7 @@ class _CartPageState extends State<CartPage> {
                   TextButton(
                     onPressed: () {
                       if (widget.items == null && widget.buyNowItem == null) {
-                        _cartManager.removeAt(index);
+                        context.read<CartCubit>().removeAt(index);
                         ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('${item.name} dihapus')));
                         return;
@@ -381,21 +394,22 @@ class _CartPageState extends State<CartPage> {
                         ],
                       ),
                     );
-                    if (confirm == true) {
-                      if (!mounted) return;
-                      if (widget.items == null && widget.buyNowItem == null) {
-                        final remaining = <Cake>[];
-                        for (var i = 0; i < _items.length; i++) {
-                          if (!(_selected.length > i && _selected[i])) {
-                            remaining.add(_items[i]);
+                        if (confirm == true) {
+                          if (!mounted) return;
+                          if (widget.items == null && widget.buyNowItem == null) {
+                            final remaining = <Cake>[];
+                            for (var i = 0; i < _items.length; i++) {
+                              if (!(_selected.length > i && _selected[i])) {
+                                remaining.add(_items[i]);
+                              }
+                            }
+                            // clear then re-add remaining
+                            context.read<CartCubit>().clear();
+                            for (final it in remaining) context.read<CartCubit>().add(it);
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                content: Text('Pembelian berhasil! Terima kasih.')));
+                            return;
                           }
-                        }
-                        _cartManager.clear();
-                        for (final it in remaining) _cartManager.add(it);
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text('Pembelian berhasil! Terima kasih.')));
-                        return;
-                      }
 
                       setState(() {
                         final remaining = <Cake>[];
