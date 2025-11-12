@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'login_page.dart';
+import '../router/navigation_helpers.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -36,13 +36,10 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animationController.forward();
 
-    // Setelah 3 detik pindah ke LoginPage
+    // Setelah 3 detik pindah ke LoginPage menggunakan GoRouter
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
+        context.toLogin();
       }
     });
   }
@@ -83,10 +80,7 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(
-                      'assets/logo.png',
-                      height: 150,
-                    ),
+                    Image.asset('assets/logo.png', height: 150),
                     const SizedBox(height: 24),
                     Text(
                       "PILACAKE",
@@ -118,7 +112,7 @@ class _SplashScreenState extends State<SplashScreen>
                     const SizedBox(height: 32),
                     LoadingAnimationWidget.threeArchedCircle(
                       color: const Color.fromARGB(255, 6, 4, 139),
-                      size: 80
+                      size: 80,
                     ),
                   ],
                 ),

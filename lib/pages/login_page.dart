@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'register_page.dart';
-import 'home_page.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:sizer/sizer.dart';
+import '../router/navigation_helpers.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -44,12 +43,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> _saveUserToPrefs(String email, String password) async {
-    final prefs = await SharedPreferences.getInstance();
-    _registeredUsers[email] = password;
-    await prefs.setString('registered_users', json.encode(_registeredUsers));
-  }
-
   void _login() {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
@@ -83,23 +76,14 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text("Login berhasil sebagai $email")));
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => HomePage(email: email)),
-    );
+
+    // Gunakan GoRouter untuk navigasi
+    context.toHome(email: email);
   }
 
   void _goToRegister() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RegisterPage(
-          onRegister: (email, password) async {
-            await _saveUserToPrefs(email, password);
-          },
-        ),
-      ),
-    ).then((_) => setState(() {}));
+    // Gunakan GoRouter untuk navigasi
+    context.toRegister();
   }
 
   @override

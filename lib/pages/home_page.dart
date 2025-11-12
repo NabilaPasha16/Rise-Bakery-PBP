@@ -14,7 +14,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 
 class HomePage extends StatefulWidget {
   final String email;
@@ -65,51 +64,92 @@ class _HomePageState extends State<HomePage> {
 
   // Daftar kue tiap kategori
   final List<Cake> burnCheeseCakeList = [
-    Cake("BurnCheeseCake Matcha", 135000, "assets/burncheesecake_matcha.png",
-        description:
-            "Perpaduan lembutnya cheesecake dengan aroma matcha khas, manis pahitnya pas dan elegan."),
-    Cake("BurnCheeseCake Brownis", 135000, "assets/burncheesecake_brownis.png",
-        description:
-            "Cheesecake lumer dengan topping brownies coklat fudgy, kombinasi rich & bikin nagih."),
-    Cake("BurnCheeseCake Biscoff", 140000, "assets/burncheesecake_biscoff.png",
-        description:
-            "Cheesecake creamy dipadu biskuit karamel Biscoff, rasa manis gurih dengan wangi khas."),
-    Cake("BurnCheeseCake Strawberry", 140000,
-        "assets/burncheesecake_strawberry.png",
-        description:
-            "Cheesecake lembut dengan segarnya strawberry, manis asam yang fresh di setiap gigitan."),
+    Cake(
+      "BurnCheeseCake Matcha",
+      135000,
+      "assets/burncheesecake_matcha.png",
+      description:
+          "Perpaduan lembutnya cheesecake dengan aroma matcha khas, manis pahitnya pas dan elegan.",
+    ),
+    Cake(
+      "BurnCheeseCake Brownis",
+      135000,
+      "assets/burncheesecake_brownis.png",
+      description:
+          "Cheesecake lumer dengan topping brownies coklat fudgy, kombinasi rich & bikin nagih.",
+    ),
+    Cake(
+      "BurnCheeseCake Biscoff",
+      140000,
+      "assets/burncheesecake_biscoff.png",
+      description:
+          "Cheesecake creamy dipadu biskuit karamel Biscoff, rasa manis gurih dengan wangi khas.",
+    ),
+    Cake(
+      "BurnCheeseCake Strawberry",
+      140000,
+      "assets/burncheesecake_strawberry.png",
+      description:
+          "Cheesecake lembut dengan segarnya strawberry, manis asam yang fresh di setiap gigitan.",
+    ),
   ];
 
   final List<Cake> tarCakeList = [
-    Cake("Tar Cake Coklat", 120000, "assets/tarcake_coklat.png",
-        description:
-            "Cake coklat moist dengan krim coklat lumer, rasa rich & manisnya bikin nggak berhenti makan."),
-    Cake("Tar Cake Matcha", 120000, "assets/tarcake_matcha.png",
-        description:
-            "Lembutnya sponge cake dengan krim matcha asli, rasa manis-pahit khas teh hijau yang menenangkan."),
-    Cake("Tar Cake Tiramisu", 125000, "assets/tarcake_tiramisu.png",
-        description:
-            "Lapisan cake lembut dengan krim keju dan aroma kopi klasik, manisnya pas & elegan."),
+    Cake(
+      "Tar Cake Coklat",
+      120000,
+      "assets/tarcake_coklat.png",
+      description:
+          "Cake coklat moist dengan krim coklat lumer, rasa rich & manisnya bikin nggak berhenti makan.",
+    ),
+    Cake(
+      "Tar Cake Matcha",
+      120000,
+      "assets/tarcake_matcha.png",
+      description:
+          "Lembutnya sponge cake dengan krim matcha asli, rasa manis-pahit khas teh hijau yang menenangkan.",
+    ),
+    Cake(
+      "Tar Cake Tiramisu",
+      125000,
+      "assets/tarcake_tiramisu.png",
+      description:
+          "Lapisan cake lembut dengan krim keju dan aroma kopi klasik, manisnya pas & elegan.",
+    ),
   ];
 
   final List<Cake> mileCrepesList = [
-    Cake("MileCrepes Matcha", 150000, "assets/milecrepes_matcha.png",
-        description:
-            "Crepes lembut berlapis krim matcha asli, rasa manis-pahitnya bikin nagih."),
-    Cake("MileCrepes Dark Choco", 150000, "assets/milecrepes_darkchoco.png",
-        description:
-            "Perpaduan cokelat hitam premium dengan crepes tipis, rasa rich & elegan untuk pecinta cokelat."),
-    Cake("MileCrepes Cookies & Cream", 155000,
-        "assets/milecrepes_cookiescream.png",
-        description:
-            "Lembutnya crepes dipadukan krim manis dan cookies renyah, favorit semua kalangan."),
+    Cake(
+      "MileCrepes Matcha",
+      150000,
+      "assets/milecrepes_matcha.png",
+      description:
+          "Crepes lembut berlapis krim matcha asli, rasa manis-pahitnya bikin nagih.",
+    ),
+    Cake(
+      "MileCrepes Dark Choco",
+      150000,
+      "assets/milecrepes_darkchoco.png",
+      description:
+          "Perpaduan cokelat hitam premium dengan crepes tipis, rasa rich & elegan untuk pecinta cokelat.",
+    ),
+    Cake(
+      "MileCrepes Cookies & Cream",
+      155000,
+      "assets/milecrepes_cookiescream.png",
+      description:
+          "Lembutnya crepes dipadukan krim manis dan cookies renyah, favorit semua kalangan.",
+    ),
   ];
 
   final List<Cake> specialCakeList = [
-    Cake("BurnCheeseCake Premium", 200000,
-        "assets/burncheesecake_premium.png",
-        description:
-            "Cheesecake premium dengan topping ekstra dan bahan pilihan."),
+    Cake(
+      "BurnCheeseCake Premium",
+      200000,
+      "assets/burncheesecake_premium.png",
+      description:
+          "Cheesecake premium dengan topping ekstra dan bahan pilihan.",
+    ),
   ];
 
   @override
@@ -135,22 +175,26 @@ class _HomePageState extends State<HomePage> {
     try {
       if (kIsWeb) {
         final info = await _deviceInfo.webBrowserInfo;
-        setState(() => _deviceData = {
-              'browser': info.browserName.toString(),
-              'userAgent': info.userAgent ?? '',
-              'appVersion': info.appVersion ?? '',
-              'platform': info.platform ?? '',
-              'vendor': info.vendor ?? '',
-            });
+        setState(
+          () => _deviceData = {
+            'browser': info.browserName.toString(),
+            'userAgent': info.userAgent ?? '',
+            'appVersion': info.appVersion ?? '',
+            'platform': info.platform ?? '',
+            'vendor': info.vendor ?? '',
+          },
+        );
       } else if (Platform.isAndroid) {
         final info = await _deviceInfo.androidInfo;
-        setState(() => _deviceData = {
-              'brand': info.brand,
-              'model': info.model,
-              'device': info.device,
-              'manufacturer': info.manufacturer,
-              'androidVersion': info.version.release,
-            });
+        setState(
+          () => _deviceData = {
+            'brand': info.brand,
+            'model': info.model,
+            'device': info.device,
+            'manufacturer': info.manufacturer,
+            'androidVersion': info.version.release,
+          },
+        );
       }
       setState(() => _loadingDevice = false);
     } catch (e) {
@@ -198,25 +242,26 @@ class _HomePageState extends State<HomePage> {
                     onTap: () async {
                       Navigator.pop(context);
                       await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (ctx) =>
-                                  ProfilePage(email: widget.email)));
+                        context,
+                        MaterialPageRoute(
+                          builder: (ctx) => ProfilePage(email: widget.email),
+                        ),
+                      );
                       await _loadProfile();
                     },
                   ),
                   ListTile(
-                    leading:
-                        const Icon(Icons.cloud, color: Colors.pinkAccent),
+                    leading: const Icon(Icons.cloud, color: Colors.pinkAccent),
                     title: const Text('Kue dari Internet 🍩'),
                     onTap: () async {
                       Navigator.pop(context);
                       final api = ApiService();
                       await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (ctx) =>
-                                  ApiCakesPage(apiService: api)));
+                        context,
+                        MaterialPageRoute(
+                          builder: (ctx) => ApiCakesPage(apiService: api),
+                        ),
+                      );
                     },
                   ),
                   const Divider(),
@@ -224,7 +269,10 @@ class _HomePageState extends State<HomePage> {
                   if (!_loadingDevice) ...[
                     Container(
                       padding: const EdgeInsets.all(16),
-                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.pink.shade50,
                         borderRadius: BorderRadius.circular(12),
@@ -242,24 +290,36 @@ class _HomePageState extends State<HomePage> {
                           ),
                           const SizedBox(height: 8),
                           if (_deviceData.containsKey('model'))
-                            Text('Model: ${_deviceData['model']}',
-                                style: GoogleFonts.poppins(fontSize: 14)),
+                            Text(
+                              'Model: ${_deviceData['model']}',
+                              style: GoogleFonts.poppins(fontSize: 14),
+                            ),
                           if (_deviceData.containsKey('brand'))
-                            Text('Merek: ${_deviceData['brand']}',
-                                style: GoogleFonts.poppins(fontSize: 14)),
+                            Text(
+                              'Merek: ${_deviceData['brand']}',
+                              style: GoogleFonts.poppins(fontSize: 14),
+                            ),
                           if (_deviceData.containsKey('androidVersion'))
-                            Text('Android: ${_deviceData['androidVersion']}',
-                                style: GoogleFonts.poppins(fontSize: 14)),
+                            Text(
+                              'Android: ${_deviceData['androidVersion']}',
+                              style: GoogleFonts.poppins(fontSize: 14),
+                            ),
                           if (_deviceData.containsKey('manufacturer'))
-                            Text('Pembuat: ${_deviceData['manufacturer']}',
-                                style: GoogleFonts.poppins(fontSize: 14)),
+                            Text(
+                              'Pembuat: ${_deviceData['manufacturer']}',
+                              style: GoogleFonts.poppins(fontSize: 14),
+                            ),
                           // Info untuk web browser
                           if (_deviceData.containsKey('browser'))
-                            Text('Browser: ${_deviceData['browser']}',
-                                style: GoogleFonts.poppins(fontSize: 14)),
+                            Text(
+                              'Browser: ${_deviceData['browser']}',
+                              style: GoogleFonts.poppins(fontSize: 14),
+                            ),
                           if (_deviceData.containsKey('platform'))
-                            Text('Platform: ${_deviceData['platform']}',
-                                style: GoogleFonts.poppins(fontSize: 14)),
+                            Text(
+                              'Platform: ${_deviceData['platform']}',
+                              style: GoogleFonts.poppins(fontSize: 14),
+                            ),
                         ],
                       ),
                     ),
@@ -269,8 +329,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: GFButton(
                 onPressed: () {
                   Navigator.pushReplacement(
@@ -279,8 +338,7 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
                 text: 'Logout',
-                icon: const Icon(Icons.power_settings_new,
-                    color: Colors.white),
+                icon: const Icon(Icons.power_settings_new, color: Colors.white),
                 color: Colors.pink.shade100,
                 blockButton: true,
               ),
@@ -312,11 +370,15 @@ class _HomePageState extends State<HomePage> {
           child: TextButton.icon(
             onPressed: () {
               Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => const CartPage()));
+                context,
+                MaterialPageRoute(builder: (_) => const CartPage()),
+              );
             },
             icon: const Icon(Icons.shopping_cart, color: Colors.white),
-            label: Text('KERANJANG🛒',
-                style: GoogleFonts.poppins(color: Colors.white)),
+            label: Text(
+              'KERANJANG🛒',
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
           ),
         ),
       ],
@@ -357,20 +419,27 @@ class _HomePageState extends State<HomePage> {
             borderRadius: BorderRadius.circular(16),
             onTap: () => _openClairmont(context),
             child: Card(
-              shape:
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               elevation: 4,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 16,
+                ),
                 child: Row(
                   children: [
                     const Icon(Icons.language, color: Colors.pinkAccent),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text('Kunjungi Situs Kue 🍰',
-                          style: GoogleFonts.poppins(
-                              fontSize: 16, fontWeight: FontWeight.w600)),
+                      child: Text(
+                        'Kunjungi Situs Kue 🍰',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                     const Icon(Icons.open_in_new, color: Colors.grey),
                   ],
@@ -390,14 +459,18 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             icon: const Icon(Icons.cloud, color: Colors.white),
-            label: const Text('Lihat Kue dari Internet 🍪',
-                style: TextStyle(color: Colors.white)),
+            label: const Text(
+              'Lihat Kue dari Internet 🍪',
+              style: TextStyle(color: Colors.white),
+            ),
             onPressed: () {
               final api = ApiService();
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => ApiCakesPage(apiService: api)));
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ApiCakesPage(apiService: api),
+                ),
+              );
             },
           ),
         ),
@@ -411,39 +484,55 @@ class _HomePageState extends State<HomePage> {
               final cakeList = (category.name == "BurnCheeseCake")
                   ? burnCheeseCakeList
                   : (category.name == "Tar Cake")
-                      ? tarCakeList
-                      : (category.name == "MileCrepes")
-                          ? mileCrepesList
-                          : specialCakeList;
+                  ? tarCakeList
+                  : (category.name == "MileCrepes")
+                  ? mileCrepesList
+                  : specialCakeList;
 
               return Card(
-                margin:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                margin: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 16,
+                ),
                 elevation: 6,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)),
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(
-                      vertical: 20, horizontal: 16),
+                    vertical: 20,
+                    horizontal: 16,
+                  ),
                   leading: CircleAvatar(
                     backgroundImage: AssetImage(category.assetImage),
                     radius: 36,
                   ),
-                  title: Text(category.name,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Colors.pink.shade700)),
-                  subtitle: Text(category.description,
-                      style: GoogleFonts.poppins(
-                          fontSize: 14, color: Colors.grey[700])),
+                  title: Text(
+                    category.name,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Colors.pink.shade700,
+                    ),
+                  ),
+                  subtitle: Text(
+                    category.description,
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey[700],
+                    ),
+                  ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 22),
                   onTap: () {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => CategoryPage(
-                                category: category.name, cakes: cakeList)));
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CategoryPage(
+                          category: category.name,
+                          cakes: cakeList,
+                        ),
+                      ),
+                    );
                   },
                 ),
               );
@@ -497,7 +586,8 @@ Future<void> _openClairmont(BuildContext context) async {
   final uri = Uri.parse('https://clairmontcake.co.id/');
   if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
     // ignore: use_build_context_synchronously
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Gagal membuka situs')));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Gagal membuka situs')));
   }
 }

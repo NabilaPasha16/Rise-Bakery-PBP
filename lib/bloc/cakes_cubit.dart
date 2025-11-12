@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../services/api_service.dart';
-import '../model/cake.dart';
 import 'cakes_state.dart';
 
 class CakesCubit extends Cubit<CakesState> {

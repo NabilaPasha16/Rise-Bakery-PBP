@@ -7,7 +7,7 @@ import 'bloc/home_cubit.dart';
 import 'bloc/category_cubit.dart';
 import 'bloc/profile_cubit.dart';
 import 'services/api_service.dart';
-import 'pages/splash_screen.dart';
+import 'router/app_router.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,19 +23,25 @@ class MyApp extends StatelessWidget {
       builder: (context, orientation, deviceType) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider(create: (context) => CakesCubit(apiService: ApiService())),
+            BlocProvider(
+              create: (context) => CakesCubit(apiService: ApiService()),
+            ),
             BlocProvider(create: (context) => CartCubit()),
-            BlocProvider(create: (context) => HomeCubit(apiService: ApiService())),
-            BlocProvider(create: (context) => CategoryCubit(apiService: ApiService())),
+            BlocProvider(
+              create: (context) => HomeCubit(apiService: ApiService()),
+            ),
+            BlocProvider(
+              create: (context) => CategoryCubit(apiService: ApiService()),
+            ),
             BlocProvider(create: (context) => ProfileCubit()),
           ],
-          child: MaterialApp(
+          child: MaterialApp.router(
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
               primarySwatch: Colors.blue,
               visualDensity: VisualDensity.adaptivePlatformDensity,
             ),
-            home: const SplashScreen(),
+            routerConfig: AppRouter.router,
           ),
         );
       },
