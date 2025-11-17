@@ -55,11 +55,11 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // Gradient background
+          // Gradient background with image overlay
           Container(
             width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
                 // changed to light brown / caramel gradient
                 colors: [
                   Color(0xFFD2A679), // caramel
@@ -68,9 +68,16 @@ class _SplashScreenState extends State<SplashScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
+              image: const DecorationImage(
+                image: AssetImage(
+                  'assets/spless.png',
+                ), // Added background image from assets
+                fit:
+                    BoxFit.cover, // Adjust fit as needed (cover, contain, etc.)
+                opacity: 0.5, // Optional: adjust opacity to blend with gradient
+              ),
             ),
           ),
-          // Image background overlay removed — using gradient only
           // Content utama (logo + teks)
           Center(
             child: FadeTransition(

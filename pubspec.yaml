@@ -83,6 +83,7 @@ flutter:
     - assets/promoburncheese.png
     - assets/promotarcakecoklat.png
     - assets/promomatcha.png
+    - assets/spless.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
