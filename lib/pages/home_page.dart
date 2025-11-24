@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import '../model/cake.dart';
 import '../model/cake_category.dart';
-import 'category_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'login_page.dart';
 import 'cart_page.dart';
 import 'profile_page.dart';
+import 'category_page.dart';
 import '../services/api_service.dart';
 import 'api_cakes_page.dart';
+import 'detail_page.dart';
+import '../utils/formatters.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -22,6 +24,18 @@ class HomePage extends StatefulWidget {
 
   @override
   State<HomePage> createState() => _HomePageState();
+}
+
+enum SortOption {
+  none,
+  nameAsc,
+  nameDesc,
+  priceAsc,
+  priceDesc,
+  catBurnCheeseCake,
+  catTarCake,
+  catMileCrepes,
+  catSpecialCake,
 }
 
 class _HomePageState extends State<HomePage> {
@@ -152,11 +166,71 @@ class _HomePageState extends State<HomePage> {
     ),
   ];
 
+  // Sorting
+  SortOption _sortOption = SortOption.none;
+
   @override
   void initState() {
     super.initState();
     _initDeviceInfo();
     _loadProfile();
+  }
+
+  List<Cake> _allCakes() {
+    return [
+      ...burnCheeseCakeList,
+      ...tarCakeList,
+      ...mileCrepesList,
+      ...specialCakeList,
+    ];
+  }
+
+  List<Cake> _sortedCakes() {
+    var list = List<Cake>.from(_allCakes());
+    
+    // Filter berdasarkan kategori jika dipilih
+    switch (_sortOption) {
+      case SortOption.catBurnCheeseCake:
+        list = list.where((c) => c.name.contains('BurnCheeseCake')).toList();
+        break;
+      case SortOption.catTarCake:
+        list = list.where((c) => c.name.contains('Tar Cake')).toList();
+        break;
+      case SortOption.catMileCrepes:
+        list = list.where((c) => c.name.contains('MileCrepes')).toList();
+        break;
+      case SortOption.catSpecialCake:
+        list = list.where((c) => c.name.contains('Premium')).toList();
+        break;
+      default:
+        break;
+    }
+    
+    // Sort berdasarkan pilihan
+    switch (_sortOption) {
+      case SortOption.nameAsc:
+        list.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case SortOption.nameDesc:
+        list.sort((a, b) => b.name.compareTo(a.name));
+        break;
+      case SortOption.priceAsc:
+        list.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case SortOption.priceDesc:
+        list.sort((a, b) => b.price.compareTo(a.price));
+        break;
+      case SortOption.catBurnCheeseCake:
+      case SortOption.catTarCake:
+      case SortOption.catMileCrepes:
+      case SortOption.catSpecialCake:
+        list.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case SortOption.none:
+        break;
+    }
+    
+    return list;
   }
 
   Future<void> _loadProfile() async {
@@ -365,6 +439,22 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: const Color.fromRGBO(255, 187, 214, 1),
       toolbarHeight: 80,
       actions: [
+        PopupMenuButton<SortOption>(
+          icon: const Icon(Icons.sort, color: Colors.white),
+          onSelected: (opt) => setState(() => _sortOption = opt),
+          itemBuilder: (ctx) => [
+            const PopupMenuItem(value: SortOption.none, child: Text('Default')),
+            const PopupMenuItem(value: SortOption.nameAsc, child: Text('Nama A-Z')),
+            const PopupMenuItem(value: SortOption.nameDesc, child: Text('Nama Z-A')),
+            const PopupMenuItem(value: SortOption.priceAsc, child: Text('Harga Termurah')),
+            const PopupMenuItem(value: SortOption.priceDesc, child: Text('Harga Tertinggi')),
+            const PopupMenuDivider(),
+            const PopupMenuItem(value: SortOption.catBurnCheeseCake, child: Text('CheeseCake')),
+            const PopupMenuItem(value: SortOption.catTarCake, child: Text('Tar Cake')),
+            const PopupMenuItem(value: SortOption.catMileCrepes, child: Text('Crepes')),
+            const PopupMenuItem(value: SortOption.catSpecialCake, child: Text('Special Cake')),
+          ],
+        ),
         Padding(
           padding: const EdgeInsets.only(right: 8.0),
           child: TextButton.icon(
@@ -376,7 +466,7 @@ class _HomePageState extends State<HomePage> {
             },
             icon: const Icon(Icons.shopping_cart, color: Colors.white),
             label: Text(
-              'KERANJANG🛒',
+              '🛒',
               style: GoogleFonts.poppins(color: Colors.white),
             ),
           ),
@@ -387,159 +477,218 @@ class _HomePageState extends State<HomePage> {
 
   // 🔹 Body
   Widget _buildBody(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: double.infinity,
-          margin: const EdgeInsets.only(bottom: 12, top: 16),
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.pink.shade200, Colors.pink.shade400],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(32),
-          ),
-          child: Center(
-            child: Text(
-              'Selamat datang, ${widget.email}',
-              style: GoogleFonts.poppins(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-        // Tombol ke situs eksternal
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: () => _openClairmont(context),
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 4,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 16,
+    final cakes = _sortedCakes();
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header greeting
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.pink.shade200, Colors.pink.shade400],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.language, color: Colors.pinkAccent),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Kunjungi Situs Kue 🍰',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const Icon(Icons.open_in_new, color: Colors.grey),
-                  ],
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Center(
+                child: Text(
+                  'Selamat datang, ${widget.email}',
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        // 🔸 Tombol ke halaman API Cakes
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.pinkAccent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-            icon: const Icon(Icons.cloud, color: Colors.white),
-            label: const Text(
-              'Lihat Kue dari Internet 🍪',
-              style: TextStyle(color: Colors.white),
-            ),
-            onPressed: () {
-              final api = ApiService();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ApiCakesPage(apiService: api),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 10),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              final category = categories[index];
-              final cakeList = (category.name == "BurnCheeseCake")
-                  ? burnCheeseCakeList
-                  : (category.name == "Tar Cake")
-                  ? tarCakeList
-                  : (category.name == "MileCrepes")
-                  ? mileCrepesList
-                  : specialCakeList;
 
-              return Card(
-                margin: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 16,
-                ),
-                elevation: 6,
+          // Tombol ke situs eksternal (kembalikan)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () => _openClairmont(context),
+              child: Card(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 20,
+                elevation: 2,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 18,
                     horizontal: 16,
                   ),
-                  leading: CircleAvatar(
-                    backgroundImage: AssetImage(category.assetImage),
-                    radius: 36,
+                  child: Center(
+                    child: Text(
+                      'Kunjungi Situs Kue 🍰',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                  title: Text(
-                    category.name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+                ),
+              ),
+            ),
+          ),
+
+          // 🔸 Tombol ke halaman API Cakes (kembalikan)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: GestureDetector(
+              onTap: () {
+                final api = ApiService();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ApiCakesPage(apiService: api),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.pink.shade100,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    'See more cake (API)',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                       color: Colors.pink.shade700,
                     ),
                   ),
-                  subtitle: Text(
-                    category.description,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.grey[700],
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+
+
+          // Categories section
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Text('Explore Top Categories', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
+          ),
+          SizedBox(
+            height: 120,
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              scrollDirection: Axis.horizontal,
+              itemCount: categories.length,
+              itemBuilder: (context, idx) {
+                final cat = categories[idx];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: GestureDetector(
+                    onTap: () {
+                      final cakeList = _allCakes().where((c) => c.name.contains(cat.name.split(' ').first)).toList();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => CategoryPage(category: cat.name, cakes: cakeList)),
+                      );
+                    },
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 76,
+                          height: 76,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(image: AssetImage(cat.assetImage), fit: BoxFit.cover),
+                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0,2))],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: 82,
+                          child: Text(cat.name, textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 12)),
+                        ),
+                      ],
                     ),
                   ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 22),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CategoryPage(
-                          category: category.name,
-                          cakes: cakeList,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
-      ],
+
+          // Popular right now
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Text('Popular right now', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
+          ),
+          SizedBox(
+            height: 220,
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              scrollDirection: Axis.horizontal,
+              itemCount: cakes.length,
+              itemBuilder: (context, idx) {
+                final cake = cakes[idx];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: GestureDetector(
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetailPage(cake: cake))),
+                    child: Container(
+                      width: 160,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0,4))],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                              child: (cake.imagePath.startsWith('http://') || cake.imagePath.startsWith('https://'))
+                                  ? Image.network(cake.imagePath, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image))
+                                  : Image.asset(cake.imagePath, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image)),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(cake.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                                const SizedBox(height: 6),
+                                Text(formatRupiah(cake.price), style: GoogleFonts.poppins(color: Colors.pink.shade700)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 32),
+        ],
+      ),
     );
   }
 
