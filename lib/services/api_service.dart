@@ -7,33 +7,36 @@ class ApiService {
   final Dio _dio;
 
   ApiService()
-      : _dio = Dio(BaseOptions(
-          baseUrl: 'https://www.themealdb.com/api/json/v1/1', // API publik khusus makanan
+    : _dio = Dio(
+        BaseOptions(
+          baseUrl:
+              'https://www.themealdb.com/api/json/v1/1', // API publik khusus makanan
           connectTimeout: const Duration(seconds: 6),
           receiveTimeout: const Duration(seconds: 6),
           responseType: ResponseType.json,
-        ));
+        ),
+      );
 
   /// 🔸 Ambil kategori kue (dummy lokal aja)
   Future<List<CakeCategory>> fetchCategories() async {
     return [
       CakeCategory(
-        id: '1',
-        name: 'Kue Coklat',
-        description: 'Kue lembut dengan rasa coklat pekat',
-        assetImage: 'assets/cakes/chocolate.png',
+        '1',
+        'Kue Coklat',
+        'Kue lembut dengan rasa coklat pekat',
+        'assets/cakes/chocolate.png',
       ),
       CakeCategory(
-        id: '2',
-        name: 'Kue Tart',
-        description: 'Kue tart manis dengan krim vanilla',
-        assetImage: 'assets/cakes/tart.png',
+        '2',
+        'Kue Tart',
+        'Kue tart manis dengan krim vanilla',
+        'assets/cakes/tart.png',
       ),
       CakeCategory(
-        id: '3',
-        name: 'Kue Keju',
-        description: 'Kue keju lembut dengan topping parutan keju',
-        assetImage: 'assets/cakes/cheese.png',
+        '3',
+        'Kue Keju',
+        'Kue keju lembut dengan topping parutan keju',
+        'assets/cakes/cheese.png',
       ),
     ];
   }
@@ -51,7 +54,8 @@ class ApiService {
       return meals.map<Cake>((m) {
         return Cake(
           m['strMeal'] ?? 'Kue Tanpa Nama',
-          (15000 + Random().nextInt(20000)) as double, // harga antara 15rb-35rb
+          (15000 + Random().nextInt(20000))
+              .toDouble(), // harga antara 15rb-35rb
           m['strMealThumb'] ?? '',
           description: m['strInstructions'] ?? '',
         );

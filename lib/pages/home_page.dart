@@ -51,28 +51,28 @@ class _HomePageState extends State<HomePage> {
   // Daftar kategori kue
   final List<CakeCategory> categories = [
     CakeCategory(
-      id: "1",
-      name: "BurnCheeseCake",
-      description: "BurnCheeseCake Series",
-      assetImage: "assets/burncheesecake_matcha.png",
+      '1',
+      'BurnCheeseCake',
+      'BurnCheeseCake Series',
+      'assets/burncheesecake_matcha.png',
     ),
     CakeCategory(
-      id: "2",
-      name: "Tar Cake",
-      description: "Tar Cake Series",
-      assetImage: "assets/tarcake_coklat.png",
+      '2',
+      'Tar Cake',
+      'Tar Cake Series',
+      'assets/tarcake_coklat.png',
     ),
     CakeCategory(
-      id: "3",
-      name: "MileCrepes",
-      description: "MileCrepes Series",
-      assetImage: "assets/milecrepes_matcha.png",
+      '3',
+      'MileCrepes',
+      'MileCrepes Series',
+      'assets/milecrepes_matcha.png',
     ),
     CakeCategory(
-      id: "4",
-      name: "Special Cake",
-      description: "Varian kue spesial premium",
-      assetImage: "assets/burncheesecake_premium.png",
+      '4',
+      'Special Cake',
+      'Varian kue spesial premium',
+      'assets/burncheesecake_premium.png',
     ),
   ];
 
@@ -187,7 +187,7 @@ class _HomePageState extends State<HomePage> {
 
   List<Cake> _sortedCakes() {
     var list = List<Cake>.from(_allCakes());
-    
+
     // Filter berdasarkan kategori jika dipilih
     switch (_sortOption) {
       case SortOption.catBurnCheeseCake:
@@ -205,7 +205,7 @@ class _HomePageState extends State<HomePage> {
       default:
         break;
     }
-    
+
     // Sort berdasarkan pilihan
     switch (_sortOption) {
       case SortOption.nameAsc:
@@ -229,7 +229,7 @@ class _HomePageState extends State<HomePage> {
       case SortOption.none:
         break;
     }
-    
+
     return list;
   }
 
@@ -444,15 +444,39 @@ class _HomePageState extends State<HomePage> {
           onSelected: (opt) => setState(() => _sortOption = opt),
           itemBuilder: (ctx) => [
             const PopupMenuItem(value: SortOption.none, child: Text('Default')),
-            const PopupMenuItem(value: SortOption.nameAsc, child: Text('Nama A-Z')),
-            const PopupMenuItem(value: SortOption.nameDesc, child: Text('Nama Z-A')),
-            const PopupMenuItem(value: SortOption.priceAsc, child: Text('Harga Termurah')),
-            const PopupMenuItem(value: SortOption.priceDesc, child: Text('Harga Tertinggi')),
+            const PopupMenuItem(
+              value: SortOption.nameAsc,
+              child: Text('Nama A-Z'),
+            ),
+            const PopupMenuItem(
+              value: SortOption.nameDesc,
+              child: Text('Nama Z-A'),
+            ),
+            const PopupMenuItem(
+              value: SortOption.priceAsc,
+              child: Text('Harga Termurah'),
+            ),
+            const PopupMenuItem(
+              value: SortOption.priceDesc,
+              child: Text('Harga Tertinggi'),
+            ),
             const PopupMenuDivider(),
-            const PopupMenuItem(value: SortOption.catBurnCheeseCake, child: Text('CheeseCake')),
-            const PopupMenuItem(value: SortOption.catTarCake, child: Text('Tar Cake')),
-            const PopupMenuItem(value: SortOption.catMileCrepes, child: Text('Crepes')),
-            const PopupMenuItem(value: SortOption.catSpecialCake, child: Text('Special Cake')),
+            const PopupMenuItem(
+              value: SortOption.catBurnCheeseCake,
+              child: Text('CheeseCake'),
+            ),
+            const PopupMenuItem(
+              value: SortOption.catTarCake,
+              child: Text('Tar Cake'),
+            ),
+            const PopupMenuItem(
+              value: SortOption.catMileCrepes,
+              child: Text('Crepes'),
+            ),
+            const PopupMenuItem(
+              value: SortOption.catSpecialCake,
+              child: Text('Special Cake'),
+            ),
           ],
         ),
         Padding(
@@ -465,10 +489,7 @@ class _HomePageState extends State<HomePage> {
               );
             },
             icon: const Icon(Icons.shopping_cart, color: Colors.white),
-            label: Text(
-              '🛒',
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
+            label: Text('🛒', style: GoogleFonts.poppins(color: Colors.white)),
           ),
         ),
       ],
@@ -554,7 +575,10 @@ class _HomePageState extends State<HomePage> {
                 );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 18,
+                  horizontal: 16,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.pink.shade100,
                   borderRadius: BorderRadius.circular(16),
@@ -587,7 +611,13 @@ class _HomePageState extends State<HomePage> {
           // Categories section
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Text('Explore Top Categories', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
+            child: Text(
+              'Explore Top Categories',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           SizedBox(
             height: 120,
@@ -601,10 +631,17 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: GestureDetector(
                     onTap: () {
-                      final cakeList = _allCakes().where((c) => c.name.contains(cat.name.split(' ').first)).toList();
+                      final cakeList = _allCakes()
+                          .where(
+                            (c) => c.name.contains(cat.name.split(' ').first),
+                          )
+                          .toList();
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => CategoryPage(category: cat.name, cakes: cakeList)),
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              CategoryPage(category: cat.name, cakes: cakeList),
+                        ),
                       );
                     },
                     child: Column(
@@ -614,14 +651,27 @@ class _HomePageState extends State<HomePage> {
                           height: 76,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            image: DecorationImage(image: AssetImage(cat.assetImage), fit: BoxFit.cover),
-                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0,2))],
+                            image: DecorationImage(
+                              image: AssetImage(cat.assetImage),
+                              fit: BoxFit.cover,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 6,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 8),
                         SizedBox(
                           width: 82,
-                          child: Text(cat.name, textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 12)),
+                          child: Text(
+                            cat.name,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(fontSize: 12),
+                          ),
                         ),
                       ],
                     ),
@@ -634,7 +684,13 @@ class _HomePageState extends State<HomePage> {
           // Popular right now
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Text('Popular right now', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
+            child: Text(
+              'Popular right now',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           SizedBox(
             height: 220,
@@ -647,23 +703,46 @@ class _HomePageState extends State<HomePage> {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetailPage(cake: cake))),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => DetailPage(cake: cake)),
+                    ),
                     child: Container(
                       width: 160,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0,4))],
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Expanded(
                             child: ClipRRect(
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                              child: (cake.imagePath.startsWith('http://') || cake.imagePath.startsWith('https://'))
-                                  ? Image.network(cake.imagePath, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image))
-                                  : Image.asset(cake.imagePath, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image)),
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(16),
+                              ),
+                              child:
+                                  (cake.imagePath.startsWith('http://') ||
+                                      cake.imagePath.startsWith('https://'))
+                                  ? Image.network(
+                                      cake.imagePath,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                          const Icon(Icons.broken_image),
+                                    )
+                                  : Image.asset(
+                                      cake.imagePath,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                          const Icon(Icons.broken_image),
+                                    ),
                             ),
                           ),
                           Padding(
@@ -671,9 +750,21 @@ class _HomePageState extends State<HomePage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(cake.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                                Text(
+                                  cake.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 const SizedBox(height: 6),
-                                Text(formatRupiah(cake.price), style: GoogleFonts.poppins(color: Colors.pink.shade700)),
+                                Text(
+                                  formatRupiah(cake.price),
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.pink.shade700,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
