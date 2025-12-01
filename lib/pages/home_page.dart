@@ -8,6 +8,7 @@ import 'login_page.dart';
 import 'cart_page.dart';
 import 'profile_page.dart';
 import 'category_page.dart';
+import 'about_us_page.dart';
 import '../services/api_service.dart';
 import 'api_cakes_page.dart';
 import 'detail_page.dart';
@@ -335,6 +336,17 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder: (ctx) => ApiCakesPage(apiService: api),
                         ),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.info, color: Colors.pinkAccent),
+                    title: const Text('About Us'),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (ctx) => const AboutUsPage()),
                       );
                     },
                   ),
