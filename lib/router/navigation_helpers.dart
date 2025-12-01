@@ -68,6 +68,11 @@ class AppNavigation {
     GoRouter.of(context).go('/api-cakes');
   }
 
+  /// Navigasi ke About Page
+  static void toAbout(BuildContext context) {
+    GoRouter.of(context).go('/about');
+  }
+
   /// Navigasi ke halaman sebelumnya
   static void back(BuildContext context) {
     if (GoRouter.of(context).canPop()) {
@@ -108,6 +113,9 @@ extension NavigationExtension on BuildContext {
 
   /// Navigasi ke API Cakes Page
   void toApiCakes() => AppNavigation.toApiCakes(this);
+
+  /// Navigasi ke About Page
+  void toAbout() => AppNavigation.toAbout(this);
 
   /// Navigasi ke halaman sebelumnya
   void back() => AppNavigation.back(this);

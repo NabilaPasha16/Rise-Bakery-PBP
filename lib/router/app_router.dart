@@ -9,6 +9,7 @@ import '../pages/cart_page.dart';
 import '../pages/category_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/api_cakes_page.dart';
+import '../pages/about_us_page.dart';
 import '../model/cake.dart';
 import '../services/api_service.dart';
 
@@ -85,6 +86,8 @@ class AppRouter {
           return ApiCakesPage(apiService: ApiService());
         },
       ),
+      // About page route
+      GoRoute(path: '/about', builder: (context, state) => const AboutUsPage()),
     ],
     errorBuilder: (context, state) => Scaffold(
       appBar: AppBar(title: const Text('Page not found')),

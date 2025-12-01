@@ -8,7 +8,8 @@ import 'login_page.dart';
 import 'cart_page.dart';
 import 'profile_page.dart';
 import 'category_page.dart';
-import 'about_us_page.dart';
+// about_us_page is reachable via GoRouter; do not import directly here to avoid unused import
+import '../router/navigation_helpers.dart';
 import '../services/api_service.dart';
 import 'api_cakes_page.dart';
 import 'detail_page.dart';
@@ -344,10 +345,8 @@ class _HomePageState extends State<HomePage> {
                     title: const Text('About Us'),
                     onTap: () async {
                       Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (ctx) => const AboutUsPage()),
-                      );
+                      // navigate using GoRouter so the about page is reachable via URL (/about)
+                      context.toAbout();
                     },
                   ),
                   const Divider(),
@@ -617,8 +616,6 @@ class _HomePageState extends State<HomePage> {
           ),
 
           const SizedBox(height: 10),
-
-
 
           // Categories section
           Padding(

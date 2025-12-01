@@ -3,8 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 // removed unused imports
 // device info removed: profile page now only supports edit + logout
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-typedef OnProfileSave = Future<void> Function(String name, String email, String avatarPath);
+typedef OnProfileSave =
+    Future<void> Function(String name, String email, String avatarPath);
 
 class _EditProfileForm extends StatefulWidget {
   final String initialName;
@@ -12,7 +14,13 @@ class _EditProfileForm extends StatefulWidget {
   final String initialAvatar;
   final OnProfileSave onSave;
 
-  const _EditProfileForm({Key? key, required this.initialName, required this.initialEmail, required this.initialAvatar, required this.onSave}) : super(key: key);
+  const _EditProfileForm({
+    Key? key,
+    required this.initialName,
+    required this.initialEmail,
+    required this.initialAvatar,
+    required this.onSave,
+  }) : super(key: key);
 
   @override
   State<_EditProfileForm> createState() => _EditProfileFormState();
@@ -43,8 +51,10 @@ class _EditProfileFormState extends State<_EditProfileForm> {
 
   Widget _avatarPreview() {
     final path = _avatarCtrl.text.trim();
-    if (path.isEmpty) return const CircleAvatar(radius: 48, backgroundColor: Colors.grey);
-    if (path.startsWith('http')) return CircleAvatar(radius: 48, backgroundImage: NetworkImage(path));
+    if (path.isEmpty)
+      return const CircleAvatar(radius: 48, backgroundColor: Colors.grey);
+    if (path.startsWith('http'))
+      return CircleAvatar(radius: 48, backgroundImage: NetworkImage(path));
     // asset
     return CircleAvatar(radius: 48, backgroundImage: AssetImage(path));
   }
@@ -53,7 +63,13 @@ class _EditProfileFormState extends State<_EditProfileForm> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
     try {
-      await widget.onSave(_nameCtrl.text.trim(), _emailCtrl.text.trim(), _avatarCtrl.text.trim().isEmpty ? 'assets/profil.png' : _avatarCtrl.text.trim());
+      await widget.onSave(
+        _nameCtrl.text.trim(),
+        _emailCtrl.text.trim(),
+        _avatarCtrl.text.trim().isEmpty
+            ? 'assets/profil.png'
+            : _avatarCtrl.text.trim(),
+      );
       if (mounted) Navigator.of(context).pop();
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -71,13 +87,30 @@ class _EditProfileFormState extends State<_EditProfileForm> {
           const SizedBox(height: 8),
           TextButton.icon(
             onPressed: () async {
-              
               final ctrl = TextEditingController(text: _avatarCtrl.text);
-              final result = await showDialog<String?>(context: context, builder: (ctx) => AlertDialog(
-                title: const Text('Change Photo (asset path or URL)'),
-                content: TextField(controller: ctrl, decoration: const InputDecoration(hintText: 'assets/profil.png or https://...')),
-                actions: [TextButton(onPressed: () => Navigator.pop(ctx, null), child: const Text('Cancel')), TextButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: const Text('OK'))],
-              ));
+              final result = await showDialog<String?>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Change Photo (asset path or URL)'),
+                  content: TextField(
+                    controller: ctrl,
+                    decoration: const InputDecoration(
+                      hintText: 'assets/profil.png or https://...',
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, null),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+                      child: const Text('OK'),
+                    ),
+                  ],
+                ),
+              );
+
               if (result != null) setState(() => _avatarCtrl.text = result);
             },
             icon: const Icon(Icons.camera_alt_outlined),
@@ -86,17 +119,25 @@ class _EditProfileFormState extends State<_EditProfileForm> {
           const SizedBox(height: 12),
           TextFormField(
             controller: _nameCtrl,
-            decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
-            validator: (v) => v == null || v.trim().isEmpty ? 'Please enter a name' : null,
+            decoration: const InputDecoration(
+              labelText: 'Name',
+              border: OutlineInputBorder(),
+            ),
+            validator: (v) =>
+                v == null || v.trim().isEmpty ? 'Please enter a name' : null,
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: _emailCtrl,
-            decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+              labelText: 'Email',
+              border: OutlineInputBorder(),
+            ),
             validator: (v) {
               if (v == null || v.trim().isEmpty) return 'Please enter email';
               final email = v.trim();
-              if (!RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+").hasMatch(email)) return 'Invalid email';
+              if (!RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+").hasMatch(email))
+                return 'Invalid email';
               return null;
             },
           ),
@@ -113,7 +154,16 @@ class _EditProfileFormState extends State<_EditProfileForm> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: _saving ? null : _onSavePressed,
-                  child: _saving ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Text('Save Changes'),
+                  child: _saving
+                      ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Save Changes'),
                 ),
               ),
             ],
@@ -135,19 +185,25 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   // no device info state needed
   String? _displayName;
-  String? _avatarPath; 
+  String? _avatarPath;
+  PermissionStatus? _cameraPermission;
+  PermissionStatus? _storagePermission;
+  PermissionStatus? _photosPermission;
+  PermissionStatus? _mediaLibraryPermission;
 
   @override
   void initState() {
     super.initState();
-    
+
     _loadProfile();
+    _updatePermissionStatuses();
   }
 
   Future<void> _loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _displayName = prefs.getString('displayName') ?? _displayNameFromEmail(widget.email);
+      _displayName =
+          prefs.getString('displayName') ?? _displayNameFromEmail(widget.email);
       _avatarPath = prefs.getString('avatarPath') ?? 'assets/profil.png';
     });
   }
@@ -158,12 +214,41 @@ class _ProfilePageState extends State<ProfilePage> {
     if (avatarPath != null) await prefs.setString('avatarPath', avatarPath);
   }
 
+  // Permission helpers
+  Future<void> _updatePermissionStatuses() async {
+    try {
+      final cam = await Permission.camera.status;
+      final stor = await Permission.storage.status;
+      final photos = await Permission.photos.status;
+      final mediaLibrary = await Permission.mediaLibrary.status;
+      if (mounted) {
+        setState(() {
+          _cameraPermission = cam;
+          _storagePermission = stor;
+          _photosPermission = photos;
+          _mediaLibraryPermission = mediaLibrary;
+        });
+      }
+    } catch (_) {}
+  }
 
-
+  Future<void> _requestPermission(Permission permission) async {
+    final status = await permission.request();
+    if (mounted) {
+      setState(() {
+        if (permission == Permission.camera) _cameraPermission = status;
+        if (permission == Permission.storage) _storagePermission = status;
+        if (permission == Permission.photos) _photosPermission = status;
+        if (permission == Permission.mediaLibrary)
+          _mediaLibraryPermission = status;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-  final email = widget.email;
+    final email = widget.email;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Profile', style: GoogleFonts.poppins()),
@@ -172,36 +257,111 @@ class _ProfilePageState extends State<ProfilePage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: _EditProfileForm(
-            initialName: _displayName ?? _displayNameFromEmail(email),
-            initialEmail: email,
-            initialAvatar: _avatarPath ?? 'assets/profil.png',
-            onSave: (name, emailValue, avatar) async {
-              setState(() {
-                _displayName = name;
-                _avatarPath = avatar;
-              });
-              await _saveProfile(name: name, avatarPath: avatar);
-              
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.setString('email', emailValue);
-              
-              if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profil disimpan')));
-            },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Permission panel
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Izin Aplikasi',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Camera: ${_cameraPermission?.toString().split('.').last ?? 'unknown'}',
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () =>
+                                _requestPermission(Permission.camera),
+                            child: const Text('Minta'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Storage: ${_storagePermission?.toString().split('.').last ?? 'unknown'}',
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () =>
+                                _requestPermission(Permission.storage),
+                            child: const Text('Minta'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Photos: ${_photosPermission?.toString().split('.').last ?? 'unknown'}',
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () =>
+                                _requestPermission(Permission.photos),
+                            child: const Text('Minta'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: _EditProfileForm(
+                  initialName: _displayName ?? _displayNameFromEmail(email),
+                  initialEmail: email,
+                  initialAvatar: _avatarPath ?? 'assets/profil.png',
+                  onSave: (name, emailValue, avatar) async {
+                    setState(() {
+                      _displayName = name;
+                      _avatarPath = avatar;
+                    });
+                    await _saveProfile(name: name, avatarPath: avatar);
+
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setString('email', emailValue);
+
+                    if (mounted)
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Profil disimpan')),
+                      );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-
-
   String _displayNameFromEmail(String email) {
     if (email.isEmpty) return 'Guest';
     final local = email.split('@').first;
     if (local.isEmpty) return 'Guest';
     final parts = local.replaceAll(RegExp(r'[._]'), ' ').split(' ');
-    final transformed = parts.map((p) => p.isEmpty ? p : '${p[0].toUpperCase()}${p.substring(1)}').join(' ');
+    final transformed = parts
+        .map((p) => p.isEmpty ? p : '${p[0].toUpperCase()}${p.substring(1)}')
+        .join(' ');
     return transformed;
   }
 }
