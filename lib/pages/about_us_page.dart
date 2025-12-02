@@ -50,11 +50,11 @@ class AboutUsPage extends StatelessWidget {
         'github': 'github.com/nabilapasha'
       },
       {
-        'name': 'Angel',
+        'name': 'Enjel',
         'nim': '233307007',
-        'role': 'Support & Dokumentasi',
-        'ig': '@angel.docs',
-        'github': 'github.com/angelDocs'
+        'role': 'UI/UX Support',
+        'ig': '@enjel',
+        'github': 'github.com/enjelsmart'
       },
     ];
 
