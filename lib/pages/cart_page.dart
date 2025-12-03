@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/cart_cubit.dart';
 import '../bloc/cart_state.dart';
+import 'receipt_page.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key, this.items, this.buyNowItem});
@@ -325,9 +326,17 @@ class _CartPageState extends State<CartPage> {
                 );
                 if (confirm == true) {
                   if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Pembelian berhasil! Terima kasih.')));
-                  Navigator.pop(context);
+                  // Navigasi ke halaman struk pembayaran
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReceiptPage(
+                        items: [widget.buyNowItem!],
+                        totalPrice: totalPrice,
+                        paymentMethod: 'Transfer Bank',
+                      ),
+                    ),
+                  );
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -396,6 +405,25 @@ class _CartPageState extends State<CartPage> {
                     );
                         if (confirm == true) {
                           if (!mounted) return;
+                          // Collect selected items
+                          final selectedItems = <Cake>[];
+                          for (var i = 0; i < _items.length; i++) {
+                            if (_selected.length > i && _selected[i]) {
+                              selectedItems.add(_items[i]);
+                            }
+                          }
+                          // Navigasi ke halaman struk pembayaran
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ReceiptPage(
+                                items: selectedItems,
+                                totalPrice: selectedTotal,
+                                paymentMethod: 'Transfer Bank',
+                              ),
+                            ),
+                          );
+                          // After receipt is closed, remove the paid items
                           if (widget.items == null && widget.buyNowItem == null) {
                             final remaining = <Cake>[];
                             for (var i = 0; i < _items.length; i++) {
@@ -406,8 +434,6 @@ class _CartPageState extends State<CartPage> {
                             // clear then re-add remaining
                             context.read<CartCubit>().clear();
                             for (final it in remaining) context.read<CartCubit>().add(it);
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                content: Text('Pembelian berhasil! Terima kasih.')));
                             return;
                           }
 
@@ -423,8 +449,6 @@ class _CartPageState extends State<CartPage> {
                         _items = remaining;
                         _selected = remainingSelected;
                       });
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Pembelian berhasil! Terima kasih.')));
                     }
                   },
             style: ElevatedButton.styleFrom(

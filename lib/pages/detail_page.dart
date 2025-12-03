@@ -5,6 +5,7 @@ import 'package:animated_rating_stars/animated_rating_stars.dart';
 import '../model/cake.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/cart_cubit.dart';
+import 'receipt_page.dart';
 
 class DetailPage extends StatelessWidget {
   static Widget _buildImage(Cake cake) {
@@ -132,8 +133,17 @@ class DetailPage extends StatelessWidget {
 
                   if (confirm == true) {
                     if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pembelian berhasil! Terima kasih.')));
-                    Navigator.pop(context); // go back after purchase
+                    // Navigasi ke halaman struk pembayaran
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReceiptPage(
+                          items: [cake],
+                          totalPrice: cake.price,
+                          paymentMethod: 'Transfer Bank',
+                        ),
+                      ),
+                    );
                   }
                 },
                 child: const Text(
