@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/router/navigation_helpers.dart';
 import 'package:getwidget/getwidget.dart';
 import '../model/cake.dart';
 import '../model/cake_category.dart';
@@ -8,8 +9,7 @@ import 'login_page.dart';
 import 'cart_page.dart';
 import 'profile_page.dart';
 import 'category_page.dart';
-import 'package:go_router/go_router.dart';
-import '../router/navigation_helpers.dart';
+import 'purchase_history_page.dart';
 import '../services/api_service.dart';
 import 'api_cakes_page.dart';
 import 'detail_page.dart';
@@ -50,122 +50,70 @@ class _HomePageState extends State<HomePage> {
   String? _displayName;
   String? _avatarPath;
 
+  // --- WARNA TEMA (Luxury Bakery) ---
+  final Color bgCream = const Color(0xFFFFF3E0); 
+  final Color bgPeach = const Color(0xFFFFE0B2); 
+  final Color textChocolate = const Color(0xFF5D4037); 
+  final Color accentPink = const Color(0xFFD81B60); 
+  final Color buttonGold = const Color(0xFFFFCA28); 
+
+  // Dekorasi Bulat Background
+  Widget _buildDecorationCircle(double size, Color color, double top, double left) {
+    return Positioned(
+      top: top,
+      left: left,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.3),
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
+
   // Daftar kategori kue
   final List<CakeCategory> categories = [
-    CakeCategory(
-      '1',
-      'BurnCheeseCake',
-      'BurnCheeseCake Series',
-      'assets/burncheesecake_matcha.png',
-    ),
-    CakeCategory(
-      '2',
-      'Tar Cake',
-      'Tar Cake Series',
-      'assets/tarcake_coklat.png',
-    ),
-    CakeCategory(
-      '3',
-      'MileCrepes',
-      'MileCrepes Series',
-      'assets/milecrepes_matcha.png',
-    ),
-    CakeCategory(
-      '4',
-      'Special Cake',
-      'Varian kue spesial premium',
-      'assets/burncheesecake_premium.png',
-    ),
+    CakeCategory('1', 'BurnCheeseCake', 'BurnCheeseCake Series', 'assets/burncheesecake_matcha.png'),
+    CakeCategory('2', 'Tar Cake', 'Tar Cake Series', 'assets/tarcake_coklat.png'),
+    CakeCategory('3', 'MileCrepes', 'MileCrepes Series', 'assets/milecrepes_matcha.png'),
+    CakeCategory('4', 'Special Cake', 'Varian kue spesial premium', 'assets/burncheesecake_premium.png'),
   ];
 
   // Daftar kue tiap kategori
   final List<Cake> burnCheeseCakeList = [
-    Cake(
-      "BurnCheeseCake Matcha",
-      135000,
-      "assets/burncheesecake_matcha.png",
-      description:
-          "Perpaduan lembutnya cheesecake dengan aroma matcha khas, manis pahitnya pas dan elegan.",
-    ),
-    Cake(
-      "BurnCheeseCake Brownis",
-      135000,
-      "assets/burncheesecake_brownis.png",
-      description:
-          "Cheesecake lumer dengan topping brownies coklat fudgy, kombinasi rich & bikin nagih.",
-    ),
-    Cake(
-      "BurnCheeseCake Biscoff",
-      140000,
-      "assets/burncheesecake_biscoff.png",
-      description:
-          "Cheesecake creamy dipadu biskuit karamel Biscoff, rasa manis gurih dengan wangi khas.",
-    ),
-    Cake(
-      "BurnCheeseCake Strawberry",
-      140000,
-      "assets/burncheesecake_strawberry.png",
-      description:
-          "Cheesecake lembut dengan segarnya strawberry, manis asam yang fresh di setiap gigitan.",
-    ),
+    Cake("BurnCheeseCake Matcha", 135000, "assets/burncheesecake_matcha.png", 
+        description: "Perpaduan lembutnya cheesecake dengan aroma matcha khas, manis pahitnya pas dan elegan."),
+    Cake("BurnCheeseCake Brownis", 135000, "assets/burncheesecake_brownis.png", 
+        description: "Cheesecake lumer dengan topping brownies coklat fudgy, kombinasi rich & bikin nagih."),
+    Cake("BurnCheeseCake Biscoff", 140000, "assets/burncheesecake_biscoff.png", 
+        description: "Cheesecake creamy dipadu biskuit karamel Biscoff, rasa manis gurih dengan wangi khas."),
+    Cake("BurnCheeseCake Strawberry", 140000, "assets/burncheesecake_strawberry.png", 
+        description: "Cheesecake lembut dengan segarnya strawberry, manis asam yang fresh di setiap gigitan."),
   ];
 
   final List<Cake> tarCakeList = [
-    Cake(
-      "Tar Cake Coklat",
-      120000,
-      "assets/tarcake_coklat.png",
-      description:
-          "Cake coklat moist dengan krim coklat lumer, rasa rich & manisnya bikin nggak berhenti makan.",
-    ),
-    Cake(
-      "Tar Cake Matcha",
-      120000,
-      "assets/tarcake_matcha.png",
-      description:
-          "Lembutnya sponge cake dengan krim matcha asli, rasa manis-pahit khas teh hijau yang menenangkan.",
-    ),
-    Cake(
-      "Tar Cake Tiramisu",
-      125000,
-      "assets/tarcake_tiramisu.png",
-      description:
-          "Lapisan cake lembut dengan krim keju dan aroma kopi klasik, manisnya pas & elegan.",
-    ),
+    Cake("Tar Cake Coklat", 120000, "assets/tarcake_coklat.png", 
+        description: "Cake coklat moist dengan krim coklat lumer, rasa rich & manisnya bikin nggak berhenti makan."),
+    Cake("Tar Cake Matcha", 120000, "assets/tarcake_matcha.png", 
+        description: "Lembutnya sponge cake dengan krim matcha asli, rasa manis-pahit khas teh hijau yang menenangkan."),
+    Cake("Tar Cake Tiramisu", 125000, "assets/tarcake_tiramisu.png", 
+        description: "Lapisan cake lembut dengan krim keju dan aroma kopi klasik, manisnya pas & elegan."),
   ];
 
   final List<Cake> mileCrepesList = [
-    Cake(
-      "MileCrepes Matcha",
-      150000,
-      "assets/milecrepes_matcha.png",
-      description:
-          "Crepes lembut berlapis krim matcha asli, rasa manis-pahitnya bikin nagih.",
-    ),
-    Cake(
-      "MileCrepes Dark Choco",
-      150000,
-      "assets/milecrepes_darkchoco.png",
-      description:
-          "Perpaduan cokelat hitam premium dengan crepes tipis, rasa rich & elegan untuk pecinta cokelat.",
-    ),
-    Cake(
-      "MileCrepes Cookies & Cream",
-      155000,
-      "assets/milecrepes_cookiescream.png",
-      description:
-          "Lembutnya crepes dipadukan krim manis dan cookies renyah, favorit semua kalangan.",
-    ),
+    Cake("MileCrepes Matcha", 150000, "assets/milecrepes_matcha.png", 
+        description: "Crepes lembut berlapis krim matcha asli, rasa manis-pahitnya bikin nagih."),
+    Cake("MileCrepes Dark Choco", 150000, "assets/milecrepes_darkchoco.png", 
+        description: "Perpaduan cokelat hitam premium dengan crepes tipis, rasa rich & elegan untuk pecinta cokelat."),
+    Cake("MileCrepes Cookies & Cream", 155000, "assets/milecrepes_cookiescream.png", 
+        description: "Lembutnya crepes dipadukan krim manis dan cookies renyah, favorit semua kalangan."),
   ];
 
   final List<Cake> specialCakeList = [
-    Cake(
-      "BurnCheeseCake Premium",
-      200000,
-      "assets/burncheesecake_premium.png",
-      description:
-          "Cheesecake premium dengan topping ekstra dan bahan pilihan.",
-    ),
+    Cake("BurnCheeseCake Premium", 200000, "assets/burncheesecake_premium.png", 
+        description: "Cheesecake premium dengan topping ekstra dan bahan pilihan."),
   ];
 
   // Sorting
@@ -190,48 +138,21 @@ class _HomePageState extends State<HomePage> {
   List<Cake> _sortedCakes() {
     var list = List<Cake>.from(_allCakes());
 
-    // Filter berdasarkan kategori jika dipilih
     switch (_sortOption) {
-      case SortOption.catBurnCheeseCake:
-        list = list.where((c) => c.name.contains('BurnCheeseCake')).toList();
-        break;
-      case SortOption.catTarCake:
-        list = list.where((c) => c.name.contains('Tar Cake')).toList();
-        break;
-      case SortOption.catMileCrepes:
-        list = list.where((c) => c.name.contains('MileCrepes')).toList();
-        break;
-      case SortOption.catSpecialCake:
-        list = list.where((c) => c.name.contains('Premium')).toList();
-        break;
-      default:
-        break;
+      case SortOption.catBurnCheeseCake: list = list.where((c) => c.name.contains('BurnCheeseCake')).toList(); break;
+      case SortOption.catTarCake: list = list.where((c) => c.name.contains('Tar Cake')).toList(); break;
+      case SortOption.catMileCrepes: list = list.where((c) => c.name.contains('MileCrepes')).toList(); break;
+      case SortOption.catSpecialCake: list = list.where((c) => c.name.contains('Premium')).toList(); break;
+      default: break;
     }
 
-    // Sort berdasarkan pilihan
     switch (_sortOption) {
-      case SortOption.nameAsc:
-        list.sort((a, b) => a.name.compareTo(b.name));
-        break;
-      case SortOption.nameDesc:
-        list.sort((a, b) => b.name.compareTo(a.name));
-        break;
-      case SortOption.priceAsc:
-        list.sort((a, b) => a.price.compareTo(b.price));
-        break;
-      case SortOption.priceDesc:
-        list.sort((a, b) => b.price.compareTo(a.price));
-        break;
-      case SortOption.catBurnCheeseCake:
-      case SortOption.catTarCake:
-      case SortOption.catMileCrepes:
-      case SortOption.catSpecialCake:
-        list.sort((a, b) => a.name.compareTo(b.name));
-        break;
-      case SortOption.none:
-        break;
+      case SortOption.nameAsc: list.sort((a, b) => a.name.compareTo(b.name)); break;
+      case SortOption.nameDesc: list.sort((a, b) => b.name.compareTo(a.name)); break;
+      case SortOption.priceAsc: list.sort((a, b) => a.price.compareTo(b.price)); break;
+      case SortOption.priceDesc: list.sort((a, b) => b.price.compareTo(a.price)); break;
+      default: break;
     }
-
     return list;
   }
 
@@ -251,167 +172,199 @@ class _HomePageState extends State<HomePage> {
     try {
       if (kIsWeb) {
         final info = await _deviceInfo.webBrowserInfo;
-        setState(
-          () => _deviceData = {
-            'browser': info.browserName.toString(),
-            'userAgent': info.userAgent ?? '',
-            'appVersion': info.appVersion ?? '',
-            'platform': info.platform ?? '',
-            'vendor': info.vendor ?? '',
-          },
-        );
+        setState(() => _deviceData = {'browser': info.browserName.toString(), 'userAgent': info.userAgent ?? ''});
       } else if (Platform.isAndroid) {
         final info = await _deviceInfo.androidInfo;
-        setState(
-          () => _deviceData = {
-            'brand': info.brand,
-            'model': info.model,
-            'device': info.device,
-            'manufacturer': info.manufacturer,
-            'androidVersion': info.version.release,
-          },
-        );
+        setState(() => _deviceData = {'brand': info.brand, 'model': info.model, 'androidVersion': info.version.release});
       }
       setState(() => _loadingDevice = false);
     } catch (e) {
-      setState(() {
-        _deviceData = {'error': 'Failed to get device info: $e'};
-        _loadingDevice = false;
-      });
+      setState(() { _deviceData = {'error': 'Failed to get device info: $e'}; _loadingDevice = false; });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
+
     return Scaffold(
+      extendBodyBehindAppBar: true, 
       drawer: _buildDrawer(context),
       appBar: _buildAppBar(context),
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Image.asset('assets/background.jpg', fit: BoxFit.cover),
+          // 1. Gradient Background
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [bgCream, bgPeach],
+              ),
+            ),
           ),
-          Positioned.fill(
-            child: Container(color: Colors.white.withOpacity(0.7)),
+          // 2. Dekorasi Bulat
+          _buildDecorationCircle(80, buttonGold, height * 0.15, width * -0.1),
+          _buildDecorationCircle(40, accentPink, height * 0.2, width * 0.85),
+          _buildDecorationCircle(60, textChocolate, height * 0.8, width * 0.1),
+          _buildDecorationCircle(100, buttonGold, height * 0.85, width * 0.7),
+          _buildDecorationCircle(30, accentPink, height * 0.5, width * 0.05),
+
+          // 3. Content
+          SafeArea(
+            top: false,
+            child: Padding(
+               padding: const EdgeInsets.only(top: kToolbarHeight + 40), 
+               child: _buildBody(context),
+            )
           ),
-          _buildBody(context),
         ],
       ),
     );
   }
 
-  // 🔹 Drawer (sidebar)
+  // 🔹 AppBar (Builder & Bubble Button)
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      centerTitle: true,
+      elevation: 0,
+      backgroundColor: Colors.transparent, 
+      
+      // Menggunakan Builder agar Drawer bisa dibuka
+      leading: Builder(
+        builder: (context) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: CircleAvatar(
+              backgroundColor: Colors.white,
+              child: IconButton(
+                icon: Icon(Icons.menu, color: textChocolate),
+                onPressed: () => Scaffold.of(context).openDrawer(), 
+              ),
+            ),
+          );
+        }
+      ),
+
+      title: Padding(
+        padding: const EdgeInsets.only(top: 10.0), 
+        child: Text(
+          'PILACAKE',
+          style: GoogleFonts.poppins(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2.0,
+            color: textChocolate,
+          ),
+        ),
+      ),
+      
+      actions: [
+        // Tombol Sort
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 8.0),
+          child: CircleAvatar(
+            backgroundColor: Colors.white,
+            child: PopupMenuButton<SortOption>(
+              icon: Icon(Icons.sort, color: textChocolate),
+              color: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              onSelected: (opt) => setState(() => _sortOption = opt),
+              itemBuilder: (ctx) => [
+                 PopupMenuItem(value: SortOption.none, child: Text('Default', style: TextStyle(color: textChocolate))),
+                 PopupMenuItem(value: SortOption.priceAsc, child: Text('Harga Termurah', style: TextStyle(color: textChocolate))),
+                 PopupMenuItem(value: SortOption.priceDesc, child: Text('Harga Tertinggi', style: TextStyle(color: textChocolate))),
+                 const PopupMenuDivider(),
+                 PopupMenuItem(value: SortOption.catBurnCheeseCake, child: Text('CheeseCake', style: TextStyle(color: textChocolate))),
+              ],
+            ),
+          ),
+        ),
+
+        // Tombol Keranjang
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 16.0),
+          child: CircleAvatar(
+            backgroundColor: Colors.white,
+            child: IconButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const CartPage()));
+              },
+              icon: Icon(Icons.shopping_cart, color: accentPink),
+              tooltip: 'Keranjang',
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 🔹 Drawer (Logout Diperbaiki - Anti Crash)
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
-      child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildDrawerHeader(),
-            Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildDrawerHeader(),
+          Expanded(
+            child: Container(
+              color: Colors.white,
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.person, color: Colors.pinkAccent),
-                    title: const Text('Profil'),
+                    leading: Icon(Icons.person, color: accentPink),
+                    title: Text('Profil', style: GoogleFonts.poppins(color: textChocolate)),
                     onTap: () async {
                       Navigator.pop(context);
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (ctx) => ProfilePage(email: widget.email),
-                        ),
-                      );
+                      await Navigator.push(context, MaterialPageRoute(builder: (ctx) => ProfilePage(email: widget.email)));
                       await _loadProfile();
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.cloud, color: Colors.pinkAccent),
-                    title: const Text('Kue dari Internet 🍩'),
+                    leading: Icon(Icons.cloud, color: accentPink),
+                    title: Text('Kue dari Internet 🍩', style: GoogleFonts.poppins(color: textChocolate)),
                     onTap: () async {
                       Navigator.pop(context);
                       final api = ApiService();
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (ctx) => ApiCakesPage(apiService: api),
-                        ),
-                      );
+                      await Navigator.push(context, MaterialPageRoute(builder: (ctx) => ApiCakesPage(apiService: api)));
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.info, color: Colors.pinkAccent),
-                    title: const Text('About Us'),
+                    leading: Icon(Icons.info, color: accentPink),
+                    title: Text('About Us', style: GoogleFonts.poppins(color: textChocolate)),
                     onTap: () async {
                       Navigator.pop(context);
                       context.toAbout();
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.mail_outline, color: Colors.pinkAccent),
-                    title: const Text('Contact Us'),
+                    leading: Icon(Icons.history, color: accentPink),
+                    title: Text('Riwayat Pembelian', style: GoogleFonts.poppins(color: textChocolate)),
                     onTap: () async {
-                      Navigator.pop(context); // Tutup drawer
-                      context.push('/contact');
+                      Navigator.pop(context);
+                      await Navigator.push(context, MaterialPageRoute(builder: (_) => const PurchaseHistoryPage()));
                     },
                   ),
                   const Divider(),
-                  // Informasi Device
+                  // Info Device
                   if (!_loadingDevice) ...[
                     Container(
                       padding: const EdgeInsets.all(16),
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
+                      margin: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.pink.shade50,
+                        color: bgCream,
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: buttonGold.withOpacity(0.5))
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Informasi Perangkat',
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.pink.shade700,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          if (_deviceData.containsKey('model'))
-                            Text(
-                              'Model: ${_deviceData['model']}',
-                              style: GoogleFonts.poppins(fontSize: 14),
-                            ),
-                          if (_deviceData.containsKey('brand'))
-                            Text(
-                              'Merek: ${_deviceData['brand']}',
-                              style: GoogleFonts.poppins(fontSize: 14),
-                            ),
-                          if (_deviceData.containsKey('androidVersion'))
-                            Text(
-                              'Android: ${_deviceData['androidVersion']}',
-                              style: GoogleFonts.poppins(fontSize: 14),
-                            ),
-                          if (_deviceData.containsKey('manufacturer'))
-                            Text(
-                              'Pembuat: ${_deviceData['manufacturer']}',
-                              style: GoogleFonts.poppins(fontSize: 14),
-                            ),
-                          // Info untuk web browser
-                          if (_deviceData.containsKey('browser'))
-                            Text(
-                              'Browser: ${_deviceData['browser']}',
-                              style: GoogleFonts.poppins(fontSize: 14),
-                            ),
-                          if (_deviceData.containsKey('platform'))
-                            Text(
-                              'Platform: ${_deviceData['platform']}',
-                              style: GoogleFonts.poppins(fontSize: 14),
-                            ),
+                          Text('Informasi Perangkat', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: textChocolate)),
+                          const SizedBox(height: 4),
+                          if (_deviceData.containsKey('model')) Text('Model: ${_deviceData['model']}', style: TextStyle(color: textChocolate, fontSize: 12)),
+                          if (_deviceData.containsKey('brand')) Text('Brand: ${_deviceData['brand']}', style: TextStyle(color: textChocolate, fontSize: 12)),
                         ],
                       ),
                     ),
@@ -420,101 +373,40 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: GFButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginPage()),
-                  );
-                },
-                text: 'Logout',
-                icon: const Icon(Icons.power_settings_new, color: Colors.white),
-                color: Colors.pink.shade100,
-                blockButton: true,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 🔹 AppBar
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      centerTitle: true,
-      title: Text(
-        'PILACAKE',
-        style: GoogleFonts.poppins(
-          fontSize: 36,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 2.0,
-          color: Colors.white,
-        ),
-      ),
-      backgroundColor: const Color.fromRGBO(255, 187, 214, 1),
-      toolbarHeight: 80,
-      actions: [
-        PopupMenuButton<SortOption>(
-          icon: const Icon(Icons.sort, color: Colors.white),
-          onSelected: (opt) => setState(() => _sortOption = opt),
-          itemBuilder: (ctx) => [
-            const PopupMenuItem(value: SortOption.none, child: Text('Default')),
-            const PopupMenuItem(
-              value: SortOption.nameAsc,
-              child: Text('Nama A-Z'),
-            ),
-            const PopupMenuItem(
-              value: SortOption.nameDesc,
-              child: Text('Nama Z-A'),
-            ),
-            const PopupMenuItem(
-              value: SortOption.priceAsc,
-              child: Text('Harga Termurah'),
-            ),
-            const PopupMenuItem(
-              value: SortOption.priceDesc,
-              child: Text('Harga Tertinggi'),
-            ),
-            const PopupMenuDivider(),
-            const PopupMenuItem(
-              value: SortOption.catBurnCheeseCake,
-              child: Text('CheeseCake'),
-            ),
-            const PopupMenuItem(
-              value: SortOption.catTarCake,
-              child: Text('Tar Cake'),
-            ),
-            const PopupMenuItem(
-              value: SortOption.catMileCrepes,
-              child: Text('Crepes'),
-            ),
-            const PopupMenuItem(
-              value: SortOption.catSpecialCake,
-              child: Text('Special Cake'),
-            ),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: TextButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const CartPage()),
-              );
-            },
-            icon: const Icon(Icons.shopping_cart, color: Colors.white),
-            label: Text('🛒', style: GoogleFonts.poppins(color: Colors.white)),
           ),
-        ),
-      ],
+          
+          // 🔴 LOGOUT FIXED (Menggunakan Future.delayed)
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+            child: GFButton(
+              onPressed: () {
+                // PERBAIKAN: Gunakan Future.delayed(Duration.zero) 
+                // untuk menunggu frame saat ini selesai sebelum melakukan navigasi.
+                // Ini mencegah error "!debugLocked" (layar merah).
+                Future.delayed(Duration.zero, () {
+                  if (context.mounted) {
+                    // Hapus semua halaman sebelumnya dan ganti dengan LoginPage
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const LoginPage()),
+                      (route) => false,
+                    );
+                  }
+                });
+              },
+              text: 'Logout',
+              icon: const Icon(Icons.power_settings_new, color: Colors.white),
+              color: accentPink,
+              shape: GFButtonShape.pills,
+              blockButton: true,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  // 🔹 Body
+  // 🔹 Body Content
   Widget _buildBody(BuildContext context) {
     final cakes = _sortedCakes();
     return SingleChildScrollView(
@@ -522,7 +414,7 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header greeting
+          // Banner Welcome
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Container(
@@ -530,93 +422,74 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.pink.shade200, Colors.pink.shade400],
+                  colors: [textChocolate.withOpacity(0.9), textChocolate.withOpacity(0.7)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(color: textChocolate.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))
+                ]
               ),
-              child: Center(
-                child: Text(
-                  'Selamat datang, ${widget.email}',
-                  style: GoogleFonts.poppins(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Welcome back,', style: GoogleFonts.greatVibes(fontSize: 24, color: buttonGold)),
+                        Text(widget.email.split('@').first, style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                      ],
+                    ),
                   ),
-                ),
+                  Icon(Icons.cake_rounded, color: buttonGold, size: 40),
+                ],
               ),
             ),
           ),
 
-          // Tombol ke situs eksternal (kembalikan)
+          // Tombol External
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
               onTap: () => _openClairmont(context),
-              child: Card(
-                shape: RoundedRectangleBorder(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
+                  boxShadow: [BoxShadow(color: const Color(0xFF8D6E63).withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 4))],
                 ),
-                elevation: 2,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 18,
-                    horizontal: 16,
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Kunjungi Situs Kue 🍰',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.public, color: accentPink),
+                    const SizedBox(width: 8),
+                    Text('Kunjungi Situs Kue 🍰', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: textChocolate)),
+                  ],
                 ),
               ),
             ),
           ),
 
-          // 🔸 Tombol ke halaman API Cakes (kembalikan)
+          // 🔸 Tombol API
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: GestureDetector(
               onTap: () {
                 final api = ApiService();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ApiCakesPage(apiService: api),
-                  ),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (_) => ApiCakesPage(apiService: api)));
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 18,
-                  horizontal: 16,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: Colors.pink.shade100,
+                  color: buttonGold,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  boxShadow: [BoxShadow(color: buttonGold.withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4))],
                 ),
                 child: Center(
-                  child: Text(
-                    'See more cake (API)',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.pink.shade700,
-                    ),
-                  ),
+                  child: Text('See more cake (API)', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: textChocolate)),
                 ),
               ),
             ),
@@ -624,16 +497,10 @@ class _HomePageState extends State<HomePage> {
 
           const SizedBox(height: 10),
 
-          // Categories section
+          // Categories
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Text(
-              'Explore Top Categories',
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: Text('Explore Top Categories', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: textChocolate)),
           ),
           SizedBox(
             height: 120,
@@ -647,47 +514,24 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: GestureDetector(
                     onTap: () {
-                      final cakeList = _allCakes()
-                          .where(
-                            (c) => c.name.contains(cat.name.split(' ').first),
-                          )
-                          .toList();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              CategoryPage(category: cat.name, cakes: cakeList),
-                        ),
-                      );
+                      final cakeList = _allCakes().where((c) => c.name.contains(cat.name.split(' ').first)).toList();
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryPage(category: cat.name, cakes: cakeList)));
                     },
                     child: Column(
                       children: [
                         Container(
-                          width: 76,
-                          height: 76,
+                          width: 76, height: 76,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            image: DecorationImage(
-                              image: AssetImage(cat.assetImage),
-                              fit: BoxFit.cover,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 6,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
+                            border: Border.all(color: Colors.white, width: 2),
+                            image: DecorationImage(image: AssetImage(cat.assetImage), fit: BoxFit.cover),
+                            boxShadow: [BoxShadow(color: const Color(0xFF8D6E63).withOpacity(0.2), blurRadius: 6, offset: const Offset(0, 2))],
                           ),
                         ),
                         const SizedBox(height: 8),
                         SizedBox(
                           width: 82,
-                          child: Text(
-                            cat.name,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.poppins(fontSize: 12),
-                          ),
+                          child: Text(cat.name, textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 12, color: textChocolate, fontWeight: FontWeight.w500)),
                         ),
                       ],
                     ),
@@ -697,21 +541,15 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // Popular right now
+          // Popular
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Text(
-              'Popular right now',
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: Text('Popular right now', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: textChocolate)),
           ),
           SizedBox(
-            height: 220,
+            height: 230,
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               scrollDirection: Axis.horizontal,
               itemCount: cakes.length,
               itemBuilder: (context, idx) {
@@ -719,68 +557,31 @@ class _HomePageState extends State<HomePage> {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => DetailPage(cake: cake)),
-                    ),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetailPage(cake: cake))),
                     child: Container(
                       width: 160,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 8,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
+                        boxShadow: [BoxShadow(color: const Color(0xFF8D6E63).withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4))],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Expanded(
                             child: ClipRRect(
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(16),
-                              ),
-                              child:
-                                  (cake.imagePath.startsWith('http://') ||
-                                      cake.imagePath.startsWith('https://'))
-                                  ? Image.network(
-                                      cake.imagePath,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) =>
-                                          const Icon(Icons.broken_image),
-                                    )
-                                  : Image.asset(
-                                      cake.imagePath,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) =>
-                                          const Icon(Icons.broken_image),
-                                    ),
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                              child: Image.asset(cake.imagePath, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image)),
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(10.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  cake.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.poppins(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                                Text(cake.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: textChocolate)),
                                 const SizedBox(height: 6),
-                                Text(
-                                  formatRupiah(cake.price),
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.pink.shade700,
-                                  ),
-                                ),
+                                Text(formatRupiah(cake.price), style: GoogleFonts.poppins(color: accentPink, fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),
@@ -792,7 +593,6 @@ class _HomePageState extends State<HomePage> {
               },
             ),
           ),
-
           const SizedBox(height: 32),
         ],
       ),
@@ -803,30 +603,27 @@ class _HomePageState extends State<HomePage> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.pink.shade200, Colors.pink.shade400],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: LinearGradient(colors: [bgCream, bgPeach], begin: Alignment.topLeft, end: Alignment.bottomRight),
       ),
-      child: Column(
-        children: [
-          GFAvatar(
-            radius: 42,
-            backgroundImage: _avatarPath != null
-                ? AssetImage(_avatarPath!) as ImageProvider
-                : const AssetImage('assets/profil.png'),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            _displayName ?? _displayNameFromEmail(widget.email),
-            style: GoogleFonts.poppins(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+      child: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 3),
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)]
+              ),
+              child: GFAvatar(
+                radius: 42,
+                backgroundImage: _avatarPath != null ? AssetImage(_avatarPath!) as ImageProvider : const AssetImage('assets/profil.png'),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Text(_displayName ?? _displayNameFromEmail(widget.email), style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: textChocolate)),
+            Text(widget.email, style: GoogleFonts.poppins(fontSize: 12, color: textChocolate.withOpacity(0.7))),
+          ],
+        ),
       ),
     );
   }
@@ -841,9 +638,6 @@ class _HomePageState extends State<HomePage> {
 Future<void> _openClairmont(BuildContext context) async {
   final uri = Uri.parse('https://clairmontcake.co.id/');
   if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-    // ignore: use_build_context_synchronously
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Gagal membuka situs')));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gagal membuka situs')));
   }
 }

@@ -12,6 +12,13 @@ class PurchaseHistoryPage extends StatefulWidget {
 }
 
 class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
+  // --- WARNA TEMA ---
+  final Color bgCream = const Color(0xFFFFF3E0);
+  final Color bgPeach = const Color(0xFFFFE0B2);
+  final Color textChocolate = const Color(0xFF5D4037);
+  final Color accentPink = const Color(0xFFD81B60);
+  final Color buttonGold = const Color(0xFFFFCA28);
+
   late Future<List<PurchaseHistory>> _historyFuture;
 
   @override
@@ -29,36 +36,39 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      extendBodyBehindAppBar: true, // Agar gradient full screen
       appBar: AppBar(
         title: Text(
           'Riwayat Pembelian 📜',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: textChocolate, // Sesuaikan warna teks
           ),
         ),
-        backgroundColor: Colors.pink.shade400,
+        backgroundColor: Colors.transparent, // Transparan
         centerTitle: true,
         elevation: 0,
+        iconTheme: IconThemeData(color: textChocolate), // Icon back coklat
         actions: [
           PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert, color: textChocolate),
+            color: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             onSelected: (value) async {
               if (value == 'clear') {
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    title: const Text('Hapus Semua Riwayat?'),
-                    content: const Text(
-                        'Semua data riwayat pembelian akan dihapus. Lanjutkan?'),
+                    title: Text('Hapus Semua Riwayat?', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: textChocolate)),
+                    content: Text('Semua data riwayat pembelian akan dihapus. Lanjutkan?', style: GoogleFonts.poppins(color: textChocolate)),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(ctx, false),
-                        child: const Text('Batal'),
+                        child: Text('Batal', style: TextStyle(color: Colors.grey)),
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(ctx, true),
-                        child: const Text('Hapus Semua'),
+                        child: Text('Hapus Semua', style: TextStyle(color: Colors.red.shade700, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -67,90 +77,103 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                   await PurchaseHistoryService.clearAllHistory();
                   _loadHistory();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Riwayat pembelian telah dihapus'),
-                      backgroundColor: Colors.green,
+                    SnackBar(
+                      content: Text('Riwayat pembelian telah dihapus', style: GoogleFonts.poppins()),
+                      backgroundColor: accentPink,
                     ),
                   );
                 }
               }
             },
             itemBuilder: (ctx) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'clear',
-                child: Text('Hapus Semua Riwayat'),
+                child: Text('Hapus Semua Riwayat', style: GoogleFonts.poppins(color: textChocolate)),
               ),
             ],
           ),
         ],
       ),
-      body: FutureBuilder<List<PurchaseHistory>>(
-        future: _historyFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator(
-                color: Colors.pink.shade400,
-              ),
-            );
-          }
-
-          if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline,
-                      size: 64, color: Colors.pink.shade400),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Terjadi kesalahan',
-                    style: GoogleFonts.poppins(fontSize: 16),
+      body: Container(
+        // BACKGROUND GRADIENT TEMA
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [bgCream, bgPeach],
+          ),
+        ),
+        child: SafeArea(
+          child: FutureBuilder<List<PurchaseHistory>>(
+            future: _historyFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    color: accentPink,
                   ),
-                ],
-              ),
-            );
-          }
+                );
+              }
 
-          final history = snapshot.data ?? [];
-
-          if (history.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.shopping_bag_outlined,
-                      size: 64, color: Colors.grey.shade400),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Belum ada riwayat pembelian',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.grey.shade600,
-                    ),
+              if (snapshot.hasError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error_outline,
+                          size: 64, color: textChocolate.withOpacity(0.5)),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Terjadi kesalahan',
+                        style: GoogleFonts.poppins(fontSize: 16, color: textChocolate),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Mulai belanja sekarang!',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
+                );
+              }
 
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            itemCount: history.length,
-            itemBuilder: (context, index) {
-              final purchase = history[index];
-              return _buildHistoryCard(context, purchase);
+              final history = snapshot.data ?? [];
+
+              if (history.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.history_edu, // Ganti icon biar variatif
+                          size: 80, color: textChocolate.withOpacity(0.3)),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Belum ada riwayat pembelian',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: textChocolate.withOpacity(0.6),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Mulai belanja sekarang!',
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: textChocolate.withOpacity(0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                itemCount: history.length,
+                itemBuilder: (context, index) {
+                  final purchase = history[index];
+                  return _buildHistoryCard(context, purchase);
+                },
+              );
             },
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -161,9 +184,12 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
   ) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 4,
+      shadowColor: textChocolate.withOpacity(0.15),
+      color: Colors.white, // Card Putih
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         onTap: () => _showPurchaseDetail(context, purchase),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -183,7 +209,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
-                            color: Colors.pink.shade700,
+                            color: accentPink, // Warna Pink Tema
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -191,7 +217,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                           _formatDate(purchase.purchaseDate),
                           style: GoogleFonts.poppins(
                             fontSize: 12,
-                            color: Colors.grey.shade600,
+                            color: textChocolate.withOpacity(0.6),
                           ),
                         ),
                       ],
@@ -203,8 +229,9 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.green.shade100,
+                      color: Colors.green.shade50,
                       borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.green.shade200),
                     ),
                     child: Text(
                       purchase.status,
@@ -219,7 +246,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
               ),
 
               const SizedBox(height: 12),
-              Divider(color: Colors.grey.shade300),
+              Divider(color: bgPeach, thickness: 1), // Divider Peach
               const SizedBox(height: 12),
 
               // Daftar item yang dibeli
@@ -228,7 +255,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                 style: GoogleFonts.poppins(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade800,
+                  color: textChocolate,
                 ),
               ),
               const SizedBox(height: 8),
@@ -244,7 +271,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                         Expanded(
                           child: Text(
                             item.name,
-                            style: GoogleFonts.poppins(fontSize: 12),
+                            style: GoogleFonts.poppins(fontSize: 12, color: textChocolate.withOpacity(0.8)),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -255,7 +282,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                           style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: Colors.pink.shade700,
+                            color: textChocolate,
                           ),
                         ),
                       ],
@@ -265,7 +292,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
               ),
 
               const SizedBox(height: 12),
-              Divider(color: Colors.grey.shade300),
+              Divider(color: bgPeach, thickness: 1),
               const SizedBox(height: 12),
 
               // Total
@@ -277,20 +304,21 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                     style: GoogleFonts.poppins(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
+                      color: textChocolate,
                     ),
                   ),
                   Text(
                     formatRupiah(purchase.totalPrice),
                     style: GoogleFonts.poppins(
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.pink.shade700,
+                      color: accentPink, // Highlight Harga
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
 
               // Tombol aksi
               Row(
@@ -298,14 +326,15 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () => _showPurchaseDetail(context, purchase),
-                      icon: const Icon(Icons.visibility, size: 18),
+                      icon: Icon(Icons.visibility, size: 18, color: textChocolate),
                       label: Text(
                         'Lihat Detail',
-                        style: GoogleFonts.poppins(fontSize: 12),
+                        style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
                       ),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.pink.shade700,
-                        side: BorderSide(color: Colors.pink.shade200),
+                        foregroundColor: textChocolate,
+                        side: BorderSide(color: textChocolate.withOpacity(0.3)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
                   ),
@@ -316,11 +345,12 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                       icon: const Icon(Icons.delete_outline, size: 18),
                       label: Text(
                         'Hapus',
-                        style: GoogleFonts.poppins(fontSize: 12),
+                        style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
                       ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.red.shade700,
                         side: BorderSide(color: Colors.red.shade200),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
                   ),
@@ -339,11 +369,12 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
   ) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,25 +390,29 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Text(
                 'Detail Pembelian',
                 style: GoogleFonts.poppins(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: textChocolate,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               _detailRow('No. Transaksi', purchase.transactionId),
               _detailRow('Tanggal', _formatDate(purchase.purchaseDate)),
               _detailRow('Metode Pembayaran', purchase.paymentMethod),
               _detailRow('Status', purchase.status),
+              const SizedBox(height: 16),
+              Divider(color: bgPeach),
               const SizedBox(height: 16),
               Text(
                 'Item yang Dibeli',
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
+                  color: textChocolate,
                 ),
               ),
               const SizedBox(height: 12),
@@ -389,38 +424,40 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                         Expanded(
                           child: Text(
                             item.name,
-                            style: GoogleFonts.poppins(fontSize: 12),
+                            style: GoogleFonts.poppins(fontSize: 13, color: textChocolate.withOpacity(0.8)),
                           ),
                         ),
                         Text(
                           formatRupiah(item.price),
                           style: GoogleFonts.poppins(
-                            fontSize: 12,
+                            fontSize: 13,
                             fontWeight: FontWeight.w600,
+                            color: textChocolate,
                           ),
                         ),
                       ],
                     ),
                   )),
-              const SizedBox(height: 12),
-              Divider(color: Colors.grey.shade300),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
+              Divider(color: bgPeach),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Total',
                     style: GoogleFonts.poppins(
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      color: textChocolate,
                     ),
                   ),
                   Text(
                     formatRupiah(purchase.totalPrice),
                     style: GoogleFonts.poppins(
-                      fontSize: 16,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.pink.shade700,
+                      color: accentPink,
                     ),
                   ),
                 ],
@@ -442,15 +479,16 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
           Text(
             label,
             style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: Colors.grey.shade600,
+              fontSize: 13,
+              color: textChocolate.withOpacity(0.6),
             ),
           ),
           Text(
             value,
             style: GoogleFonts.poppins(
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: FontWeight.w600,
+              color: textChocolate,
             ),
           ),
         ],
@@ -462,16 +500,16 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Hapus Riwayat?'),
-        content: const Text('Data riwayat pembelian ini akan dihapus. Lanjutkan?'),
+        title: Text('Hapus Riwayat?', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: textChocolate)),
+        content: Text('Data riwayat pembelian ini akan dihapus. Lanjutkan?', style: GoogleFonts.poppins(color: textChocolate)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Batal'),
+            child: const Text('Batal', style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Hapus'),
+            child: Text('Hapus', style: TextStyle(color: Colors.red.shade700, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -481,9 +519,9 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
       await PurchaseHistoryService.deletePurchase(purchase.transactionId);
       _loadHistory();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Riwayat pembelian telah dihapus'),
-          backgroundColor: Colors.green,
+        SnackBar(
+          content: Text('Riwayat pembelian telah dihapus', style: GoogleFonts.poppins()),
+          backgroundColor: accentPink,
         ),
       );
     }
@@ -491,18 +529,8 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year} • ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }

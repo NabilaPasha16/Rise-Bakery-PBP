@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-// removed unused imports
-// device info removed: profile page now only supports edit + logout
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+// --- WARNA TEMA (GLOBAL) ---
+final Color bgCream = const Color(0xFFFFF3E0);
+final Color bgPeach = const Color(0xFFFFE0B2);
+final Color textChocolate = const Color(0xFF5D4037);
+final Color accentPink = const Color(0xFFD81B60);
+final Color buttonGold = const Color(0xFFFFCA28);
 
 typedef OnProfileSave =
     Future<void> Function(String name, String email, String avatarPath);
@@ -51,12 +56,30 @@ class _EditProfileFormState extends State<_EditProfileForm> {
 
   Widget _avatarPreview() {
     final path = _avatarCtrl.text.trim();
-    if (path.isEmpty)
-      return const CircleAvatar(radius: 48, backgroundColor: Colors.grey);
-    if (path.startsWith('http'))
-      return CircleAvatar(radius: 48, backgroundImage: NetworkImage(path));
-    // asset
-    return CircleAvatar(radius: 48, backgroundImage: AssetImage(path));
+    ImageProvider img;
+    if (path.isEmpty) {
+      return CircleAvatar(radius: 50, backgroundColor: Colors.grey.shade300, child: Icon(Icons.person, size: 50, color: Colors.white));
+    } else if (path.startsWith('http')) {
+      img = NetworkImage(path);
+    } else {
+      img = AssetImage(path);
+    }
+    
+    // Tambahkan border emas agar mewah
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: buttonGold, width: 3),
+        boxShadow: [
+          BoxShadow(
+            color: textChocolate.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: CircleAvatar(radius: 48, backgroundImage: img),
+    );
   }
 
   Future<void> _onSavePressed() async {
@@ -84,28 +107,28 @@ class _EditProfileFormState extends State<_EditProfileForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Center(child: _avatarPreview()),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           TextButton.icon(
             onPressed: () async {
               final ctrl = TextEditingController(text: _avatarCtrl.text);
               final result = await showDialog<String?>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Change Photo (asset path or URL)'),
+                  title: Text('Ganti Foto', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: textChocolate)),
                   content: TextField(
                     controller: ctrl,
                     decoration: const InputDecoration(
-                      hintText: 'assets/profil.png or https://...',
+                      hintText: 'assets/profil.png atau URL...',
                     ),
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, null),
-                      child: const Text('Cancel'),
+                      child: const Text('Batal'),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-                      child: const Text('OK'),
+                      child: Text('OK', style: TextStyle(color: accentPink, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -113,62 +136,90 @@ class _EditProfileFormState extends State<_EditProfileForm> {
 
               if (result != null) setState(() => _avatarCtrl.text = result);
             },
-            icon: const Icon(Icons.camera_alt_outlined),
-            label: const Text('Change Photo'),
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _nameCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Name',
-              border: OutlineInputBorder(),
-            ),
-            validator: (v) =>
-                v == null || v.trim().isEmpty ? 'Please enter a name' : null,
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _emailCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Email',
-              border: OutlineInputBorder(),
-            ),
-            validator: (v) {
-              if (v == null || v.trim().isEmpty) return 'Please enter email';
-              final email = v.trim();
-              if (!RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+").hasMatch(email))
-                return 'Invalid email';
-              return null;
-            },
+            icon: Icon(Icons.camera_alt_outlined, color: accentPink),
+            label: Text('Ganti Foto', style: GoogleFonts.poppins(color: accentPink, fontWeight: FontWeight.w600)),
           ),
           const SizedBox(height: 20),
+          
+          // Custom Text Field Style
+          _buildTextField(_nameCtrl, 'Nama Lengkap', Icons.person_outline),
+          const SizedBox(height: 16),
+          _buildTextField(_emailCtrl, 'Email', Icons.email_outlined, validator: (v) {
+            if (v == null || v.trim().isEmpty) return 'Email wajib diisi';
+            final email = v.trim();
+            if (!RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+").hasMatch(email))
+              return 'Format email salah';
+            return null;
+          }),
+          
+          const SizedBox(height: 30),
+          
           Row(
             children: [
               Expanded(
                 child: OutlinedButton(
                   onPressed: _saving ? null : () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    side: BorderSide(color: textChocolate.withOpacity(0.5)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text('Batal', style: GoogleFonts.poppins(color: textChocolate)),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
                   onPressed: _saving ? null : _onSavePressed,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: accentPink,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 5,
+                    shadowColor: accentPink.withOpacity(0.4),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                   child: _saving
                       ? const SizedBox(
-                          height: 16,
-                          width: 16,
+                          height: 20,
+                          width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             color: Colors.white,
                           ),
                         )
-                      : const Text('Save Changes'),
+                      : Text('Simpan', style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {String? Function(String?)? validator}) {
+    return TextFormField(
+      controller: controller,
+      style: GoogleFonts.poppins(color: textChocolate),
+      validator: validator ?? (v) => v == null || v.trim().isEmpty ? 'Wajib diisi' : null,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.poppins(color: textChocolate.withOpacity(0.6)),
+        prefixIcon: Icon(icon, color: buttonGold),
+        filled: true,
+        fillColor: Colors.white,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: textChocolate.withOpacity(0.2)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: accentPink, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
       ),
     );
   }
@@ -250,107 +301,139 @@ class _ProfilePageState extends State<ProfilePage> {
     final email = widget.email;
 
     return Scaffold(
+      extendBodyBehindAppBar: true, // Agar gradient full screen
       appBar: AppBar(
-        title: Text('Edit Profile', style: GoogleFonts.poppins()),
-        backgroundColor: const Color.fromRGBO(255, 187, 214, 1),
+        title: Text('Edit Profil', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: textChocolate)),
+        backgroundColor: Colors.transparent, // Transparan
+        centerTitle: true,
+        elevation: 0,
+        iconTheme: IconThemeData(color: textChocolate),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Permission panel
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Izin Aplikasi',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
+      body: Container(
+        // BACKGROUND GRADIENT TEMA
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [bgCream, bgPeach],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: SingleChildScrollView( // Tambahkan scroll agar aman di layar kecil
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Permission panel (Card Putih Mewah)
+                  Card(
+                    elevation: 4,
+                    shadowColor: textChocolate.withOpacity(0.1),
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              'Camera: ${_cameraPermission?.toString().split('.').last ?? 'unknown'}',
-                            ),
+                          Row(
+                            children: [
+                              Icon(Icons.security, color: accentPink, size: 20),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Izin Aplikasi',
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  color: textChocolate,
+                                  fontSize: 16
+                                ),
+                              ),
+                            ],
                           ),
-                          ElevatedButton(
-                            onPressed: () =>
-                                _requestPermission(Permission.camera),
-                            child: const Text('Minta'),
-                          ),
+                          const SizedBox(height: 12),
+                          _buildPermissionRow('Kamera', _cameraPermission, Permission.camera),
+                          const SizedBox(height: 8),
+                          _buildPermissionRow('Penyimpanan', _storagePermission, Permission.storage),
+                          const SizedBox(height: 8),
+                          _buildPermissionRow('Foto', _photosPermission, Permission.photos),
                         ],
                       ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Storage: ${_storagePermission?.toString().split('.').last ?? 'unknown'}',
-                            ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () =>
-                                _requestPermission(Permission.storage),
-                            child: const Text('Minta'),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Photos: ${_photosPermission?.toString().split('.').last ?? 'unknown'}',
-                            ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () =>
-                                _requestPermission(Permission.photos),
-                            child: const Text('Minta'),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: _EditProfileForm(
-                  initialName: _displayName ?? _displayNameFromEmail(email),
-                  initialEmail: email,
-                  initialAvatar: _avatarPath ?? 'assets/profil.png',
-                  onSave: (name, emailValue, avatar) async {
-                    setState(() {
-                      _displayName = name;
-                      _avatarPath = avatar;
-                    });
-                    await _saveProfile(name: name, avatarPath: avatar);
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Form Edit Profile (Card Putih Mewah)
+                  Card(
+                    elevation: 4,
+                    shadowColor: textChocolate.withOpacity(0.1),
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: _EditProfileForm(
+                        initialName: _displayName ?? _displayNameFromEmail(email),
+                        initialEmail: email,
+                        initialAvatar: _avatarPath ?? 'assets/profil.png',
+                        onSave: (name, emailValue, avatar) async {
+                          setState(() {
+                            _displayName = name;
+                            _avatarPath = avatar;
+                          });
+                          await _saveProfile(name: name, avatarPath: avatar);
 
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setString('email', emailValue);
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setString('email', emailValue);
 
-                    if (mounted)
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Profil disimpan')),
-                      );
-                  },
-                ),
+                          if (mounted)
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Profil berhasil disimpan', style: GoogleFonts.poppins()),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPermissionRow(String label, PermissionStatus? status, Permission permission) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            '$label: ${status?.toString().split('.').last ?? 'unknown'}',
+            style: GoogleFonts.poppins(fontSize: 13, color: textChocolate.withOpacity(0.8)),
+          ),
+        ),
+        SizedBox(
+          height: 32,
+          child: ElevatedButton(
+            onPressed: () => _requestPermission(permission),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: buttonGold,
+              foregroundColor: textChocolate,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
+            child: Text('Minta', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.bold)),
+          ),
+        ),
+      ],
     );
   }
 

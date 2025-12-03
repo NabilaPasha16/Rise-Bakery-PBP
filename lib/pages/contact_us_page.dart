@@ -20,6 +20,13 @@ class _ContactUsPageState extends State<ContactUsPage> {
   final _emailCtrl = TextEditingController();
   final _msgC = TextEditingController();
 
+  // --- WARNA TEMA ---
+  final Color bgCream = const Color(0xFFFFF3E0);
+  final Color bgPeach = const Color(0xFFFFE0B2);
+  final Color textChocolate = const Color(0xFF5D4037);
+  final Color accentPink = const Color(0xFFD81B60);
+  final Color buttonGold = const Color(0xFFFFCA28);
+
   @override
   void dispose() {
     _nameCtrl.dispose();
@@ -44,9 +51,8 @@ class _ContactUsPageState extends State<ContactUsPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Cek lebar layar untuk responsivitas (Responsive Layout)
     final width = MediaQuery.of(context).size.width;
-    final isWide = width > 800; // Jika lebar > 800px (Web/Tablet), pakai layout samping-sampingan
+    final isWide = width > 800; 
 
     return BlocProvider(
       create: (_) => ContactCubit(ApiService()),
@@ -55,9 +61,15 @@ class _ContactUsPageState extends State<ContactUsPage> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
+          leading: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: CircleAvatar(
+              backgroundColor: Colors.white,
+              child: IconButton(
+                icon: Icon(Icons.arrow_back, color: textChocolate),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
           ),
         ),
         body: BlocConsumer<ContactCubit, ContactState>(
@@ -92,7 +104,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
                         image: const AssetImage('assets/background.jpg'),
                         fit: BoxFit.cover,
                         colorFilter: ColorFilter.mode(
-                          Colors.black.withOpacity(0.5),
+                          textChocolate.withOpacity(0.6), // Overlay Coklat
                           BlendMode.darken,
                         ),
                       ),
@@ -104,15 +116,15 @@ class _ContactUsPageState extends State<ContactUsPage> {
                           const SizedBox(height: 40),
                           Text(
                             "CONTACT US",
-                            style: GoogleFonts.poppins(
-                              fontSize: 36,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
+                            style: GoogleFonts.playfairDisplay( // Font Mewah
+                              fontSize: 42,
+                              fontWeight: FontWeight.bold,
+                              color: buttonGold, // Warna Emas
                               letterSpacing: 2.5,
                             ),
                           ),
                           const SizedBox(height: 10),
-                          Container(height: 4, width: 80, color: Colors.orangeAccent),
+                          Container(height: 4, width: 80, color: Colors.white),
                         ],
                       ),
                     ),
@@ -121,53 +133,56 @@ class _ContactUsPageState extends State<ContactUsPage> {
                   // ============================================
                   // 2. MAIN CONTENT (INFO & FORM)
                   // ============================================
-                  // FIX: Menggunakan Transform.translate agar tidak error margin negatif
-                  Transform.translate(
-                    offset: const Offset(0, -40), // Geser ke atas 40 pixel
-                    child: Container(
-                      width: isWide ? 1000 : double.infinity, 
-                      // Hapus margin top negatif, gunakan bottom saja
-                      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 40), 
-                      padding: const EdgeInsets.all(30),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
+                  Container(
+                    // Background Gradient Theme untuk sisa halaman
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [bgCream, bgPeach],
                       ),
-                      child: isWide
-                          ? Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // KIRI: Info Toko & Sosmed
-                                Expanded(flex: 4, child: _buildInfoSection()),
-                                
-                                // GARIS PEMISAH VERTIKAL
-                                Container(
-                                  width: 1, 
-                                  height: 400, 
-                                  color: Colors.grey[300], 
-                                  margin: const EdgeInsets.symmetric(horizontal: 40),
-                                ),
-
-                                // KANAN: Form Pesan
-                                Expanded(flex: 5, child: _buildFormSection(state, context)),
-                              ],
-                            )
-                          : Column(
-                              children: [
-                                _buildInfoSection(),
-                                const SizedBox(height: 40),
-                                const Divider(thickness: 1.5),
-                                const SizedBox(height: 40),
-                                _buildFormSection(state, context),
-                              ],
+                    ),
+                    child: Transform.translate(
+                      offset: const Offset(0, -40), 
+                      child: Container(
+                        width: isWide ? 1000 : double.infinity, 
+                        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 40), 
+                        padding: const EdgeInsets.all(30),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24), // Rounded lebih halus
+                          boxShadow: [
+                            BoxShadow(
+                              color: textChocolate.withOpacity(0.15), // Shadow Coklat
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
                             ),
+                          ],
+                        ),
+                        child: isWide
+                            ? Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(flex: 4, child: _buildInfoSection()),
+                                  Container(
+                                    width: 1, 
+                                    height: 400, 
+                                    color: bgPeach, 
+                                    margin: const EdgeInsets.symmetric(horizontal: 40),
+                                  ),
+                                  Expanded(flex: 5, child: _buildFormSection(state, context)),
+                                ],
+                              )
+                            : Column(
+                                children: [
+                                  _buildInfoSection(),
+                                  const SizedBox(height: 40),
+                                  Divider(thickness: 1.5, color: bgPeach),
+                                  const SizedBox(height: 40),
+                                  _buildFormSection(state, context),
+                                ],
+                              ),
+                      ),
                     ),
                   ),
                 ],
@@ -192,10 +207,10 @@ class _ContactUsPageState extends State<ContactUsPage> {
               const SizedBox(height: 12),
               Text(
                 "RISE BAKERY",
-                style: GoogleFonts.poppins(
-                  fontSize: 26,
+                style: GoogleFonts.playfairDisplay( // Font Mewah
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.brown[800],
+                  color: textChocolate,
                 ),
               ),
             ],
@@ -221,7 +236,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
         Text(
           "Temukan Kami di:",
           style: GoogleFonts.poppins(
-            fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[700],
+            fontSize: 14, fontWeight: FontWeight.w600, color: textChocolate.withOpacity(0.7),
           ),
         ),
         const SizedBox(height: 16),
@@ -244,16 +259,16 @@ class _ContactUsPageState extends State<ContactUsPage> {
       children: [
         Text(
           "Kirim Pesan Langsung",
-          style: GoogleFonts.poppins(
-            fontSize: 22,
+          style: GoogleFonts.playfairDisplay(
+            fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.brown[700],
+            color: textChocolate,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           "Punya kritik, saran, atau pertanyaan? Isi formulir di bawah ini.",
-          style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600]),
+          style: GoogleFonts.poppins(fontSize: 14, color: textChocolate.withOpacity(0.6)),
         ),
         const SizedBox(height: 30),
 
@@ -297,17 +312,17 @@ class _ContactUsPageState extends State<ContactUsPage> {
                               email: _emailCtrl.text,
                               message: _msgC.text,
                             );
-                            // Mengakses Cubit via ctx
                             ctx.read<ContactCubit>().sendContact(msg);
                           }
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.pink.shade400,
+                    backgroundColor: accentPink, // Tombol Pink Mewah
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     elevation: 5,
+                    shadowColor: accentPink.withOpacity(0.4),
                   ),
                   child: state is ContactSending
                       ? const CircularProgressIndicator(color: Colors.white)
@@ -327,15 +342,15 @@ class _ContactUsPageState extends State<ContactUsPage> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: Colors.pink.shade400, size: 26),
+        Icon(icon, color: accentPink, size: 26),
         const SizedBox(width: 15),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)),
+              Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 15, color: textChocolate)),
               const SizedBox(height: 4),
-              Text(content, style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[700], height: 1.5)),
+              Text(content, style: GoogleFonts.poppins(fontSize: 14, color: textChocolate.withOpacity(0.8), height: 1.5)),
             ],
           ),
         ),
@@ -376,15 +391,16 @@ class _ContactUsPageState extends State<ContactUsPage> {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
-      style: GoogleFonts.poppins(fontSize: 14),
+      style: GoogleFonts.poppins(fontSize: 14, color: textChocolate),
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, color: Colors.grey[400]),
+        labelStyle: GoogleFonts.poppins(color: textChocolate.withOpacity(0.6)),
+        prefixIcon: Icon(icon, color: buttonGold),
         filled: true,
-        fillColor: Colors.grey[50],
+        fillColor: bgCream.withOpacity(0.3), // Background input cream tipis
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.pinkAccent)),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: textChocolate.withOpacity(0.2))),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: accentPink, width: 2)),
       ),
       validator: validator,
     );

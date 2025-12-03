@@ -19,10 +19,15 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
+  // --- WARNA TEMA ---
+  final Color bgCream = const Color(0xFFFFF3E0);
+  final Color bgPeach = const Color(0xFFFFE0B2);
+  final Color textChocolate = const Color(0xFF5D4037);
+  final Color accentPink = const Color(0xFFD81B60);
+  final Color buttonGold = const Color(0xFFFFCA28);
+
   late List<Cake> _items;
   late List<bool> _selected;
-  // cart items kept in local view; when not provided, we sync with CartCubit
-  // CartCubit instance is provided globally in main.dart
   StreamSubscription<CartState>? _cartSub;
 
   double get totalPrice => widget.buyNowItem != null
@@ -34,7 +39,6 @@ class _CartPageState extends State<CartPage> {
     super.initState();
     _items = widget.items != null ? List<Cake>.from(widget.items!) : <Cake>[];
     if (widget.items == null && widget.buyNowItem == null) {
-      // sync initial items from CartCubit
       final cubit = context.read<CartCubit>();
       _items = List<Cake>.from(cubit.items);
       _cartSub = cubit.stream.listen((state) {
@@ -73,49 +77,61 @@ class _CartPageState extends State<CartPage> {
     super.dispose();
   }
 
-  // legacy hook removed; we now subscribe to CartCubit's stream in initState
-
   @override
   Widget build(BuildContext context) {
     final isBuyNow = widget.buyNowItem != null;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      extendBodyBehindAppBar: true, // Agar gradient full screen
       appBar: AppBar(
         title: Text(
-          'Keranjang Belanja 🛒',
+          isBuyNow ? 'Beli Langsung ⚡' : 'Keranjang Belanja 🛒',
           style: GoogleFonts.poppins(
-              fontWeight: FontWeight.bold, color: Colors.pink.shade700),
+              fontWeight: FontWeight.bold, color: textChocolate),
         ),
-        backgroundColor: Colors.white,
-        iconTheme: IconThemeData(color: Colors.pink.shade700),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: IconThemeData(color: textChocolate),
         actions: [
           if (!isBuyNow && _items.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_forever),
+              color: accentPink, // Warna icon hapus
               tooltip: "Kosongkan Keranjang",
               onPressed: () {
                 context.read<CartCubit>().clear();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Keranjang dikosongkan."),
-                    duration: Duration(seconds: 2),
+                  SnackBar(
+                    content: Text("Keranjang dikosongkan.", style: GoogleFonts.poppins()),
+                    backgroundColor: textChocolate,
+                    duration: const Duration(seconds: 2),
                   ),
                 );
               },
             ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: isBuyNow
-                  ? _buildBuyNowBody(widget.buyNowItem!)
-                  : _buildCartContent(),
-            ),
-            _buildBottomBar(isBuyNow),
-          ],
+      body: Container(
+        // BACKGROUND GRADIENT TEMA
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [bgCream, bgPeach],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: isBuyNow
+                    ? _buildBuyNowBody(widget.buyNowItem!)
+                    : _buildCartContent(),
+              ),
+              _buildBottomBar(isBuyNow),
+            ],
+          ),
         ),
       ),
     );
@@ -123,32 +139,34 @@ class _CartPageState extends State<CartPage> {
 
   Widget _buildBuyNowBody(Cake item) {
     return ListView(
-      padding: const EdgeInsets.only(top: 8, bottom: 80),
+      padding: const EdgeInsets.only(top: 12, bottom: 20),
       children: [
         Card(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           color: Colors.white,
           elevation: 4,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shadowColor: textChocolate.withOpacity(0.2),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   child: _buildImage(item, width: 80, height: 80),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(item.name,
                           style: GoogleFonts.poppins(
+                              color: textChocolate,
                               fontWeight: FontWeight.bold, fontSize: 16)),
                       const SizedBox(height: 6),
                       Text(item.description,
+                          style: GoogleFonts.poppins(color: textChocolate.withOpacity(0.7)),
                           maxLines: 2, overflow: TextOverflow.ellipsis),
                     ],
                   ),
@@ -160,15 +178,17 @@ class _CartPageState extends State<CartPage> {
                     Text(formatRupiah(item.price),
                         style: GoogleFonts.poppins(
                             fontWeight: FontWeight.bold,
-                            color: Colors.pink.shade800)),
+                            fontSize: 14,
+                            color: accentPink)),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 6),
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(8)),
-                      child: Text('x1', style: GoogleFonts.poppins()),
+                          color: bgCream,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: buttonGold.withOpacity(0.5))),
+                      child: Text('x1', style: GoogleFonts.poppins(color: textChocolate, fontWeight: FontWeight.w600)),
                     ),
                   ],
                 ),
@@ -186,19 +206,23 @@ class _CartPageState extends State<CartPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.shopping_cart_outlined,
-                size: 64, color: Colors.grey),
-            const SizedBox(height: 12),
+            Icon(Icons.shopping_cart_outlined,
+                size: 80, color: textChocolate.withOpacity(0.3)),
+            const SizedBox(height: 16),
             Text(
               "Keranjang kamu masih kosong 🍰",
-              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+              style: GoogleFonts.poppins(fontSize: 16, color: textChocolate.withOpacity(0.7)),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
-              style:
-                  ElevatedButton.styleFrom(backgroundColor: Colors.pink.shade400),
-              child: const Text('Kembali Belanja'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: accentPink,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)
+              ),
+              child: Text('Kembali Belanja', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -206,42 +230,49 @@ class _CartPageState extends State<CartPage> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.only(top: 8, bottom: 8),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       itemCount: _items.length,
       itemBuilder: (context, index) {
         final item = _items[index];
         return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          elevation: 3,
+          shadowColor: textChocolate.withOpacity(0.15),
+          color: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: ListTile(
             contentPadding:
-                const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             leading: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(10),
               child: _buildImage(item, width: 64, height: 64),
             ),
             title: Text(item.name,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 16)),
+                style: GoogleFonts.poppins(
+                    color: textChocolate,
+                    fontWeight: FontWeight.bold, fontSize: 15)),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 4),
                 Text(item.description,
-                    maxLines: 2, overflow: TextOverflow.ellipsis),
+                    style: GoogleFonts.poppins(fontSize: 11, color: textChocolate.withOpacity(0.6)),
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 6),
                 Text(formatRupiah(item.price),
-                    style: TextStyle(
-                        color: Colors.pink.shade700,
+                    style: GoogleFonts.poppins(
+                        color: accentPink,
                         fontWeight: FontWeight.bold)),
               ],
             ),
             trailing: SizedBox(
-              width: 110,
+              width: 100,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Checkbox(
+                    activeColor: accentPink,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                     value: _selected.length > index ? _selected[index] : true,
                     onChanged: (v) {
                       setState(() {
@@ -253,13 +284,16 @@ class _CartPageState extends State<CartPage> {
                       });
                     },
                   ),
-                  const SizedBox(width: 4),
-                  TextButton(
-                    onPressed: () {
+                  InkWell(
+                    onTap: () {
                       if (widget.items == null && widget.buyNowItem == null) {
                         context.read<CartCubit>().removeAt(index);
                         ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${item.name} dihapus')));
+                            SnackBar(
+                              content: Text('${item.name} dihapus', style: GoogleFonts.poppins()),
+                              backgroundColor: textChocolate,
+                              duration: const Duration(milliseconds: 1500),
+                            ));
                         return;
                       }
                       setState(() {
@@ -267,10 +301,12 @@ class _CartPageState extends State<CartPage> {
                         if (_selected.length > index) _selected.removeAt(index);
                       });
                       ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${item.name} dihapus')));
+                          SnackBar(content: Text('${item.name} dihapus', style: GoogleFonts.poppins())));
                     },
-                    style: TextButton.styleFrom(foregroundColor: Colors.pink),
-                    child: const Text('Hapus'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Icon(Icons.delete_outline, color: Colors.red[400], size: 22),
+                    ),
                   ),
                 ],
               ),
@@ -286,22 +322,25 @@ class _CartPageState extends State<CartPage> {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-            color: Colors.pink.shade400,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12))),
+            color: Colors.white, // Bottom bar putih lebih bersih
+            boxShadow: [
+              BoxShadow(color: textChocolate.withOpacity(0.1), blurRadius: 10, offset: const Offset(0,-5))
+            ],
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20))),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Total:",
+                Text("Total Pembayaran:",
                     style: GoogleFonts.poppins(
-                        color: Colors.white70,
-                        fontSize: 14,
+                        color: textChocolate.withOpacity(0.7),
+                        fontSize: 12,
                         fontWeight: FontWeight.w600)),
                 Text(formatRupiah(totalPrice),
                     style: GoogleFonts.poppins(
-                        color: Colors.white,
+                        color: accentPink,
                         fontSize: 18,
                         fontWeight: FontWeight.bold)),
               ],
@@ -326,7 +365,6 @@ class _CartPageState extends State<CartPage> {
                 );
                 if (confirm == true) {
                   if (!mounted) return;
-                  // Navigasi ke halaman struk pembayaran
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -340,11 +378,14 @@ class _CartPageState extends State<CartPage> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade700,
+                  backgroundColor: accentPink, // Tombol Pink
+                  elevation: 5,
+                  shadowColor: accentPink.withOpacity(0.4),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 18, vertical: 12)),
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
               child:
-                  Text('Beli Sekarang', style: GoogleFonts.poppins(color: Colors.white)),
+                  Text('Beli Sekarang', style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -363,8 +404,11 @@ class _CartPageState extends State<CartPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-          color: Colors.pink.shade400,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12))),
+          color: Colors.white, // Bottom bar putih
+          boxShadow: [
+              BoxShadow(color: textChocolate.withOpacity(0.1), blurRadius: 10, offset: const Offset(0,-5))
+          ],
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20))),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -373,12 +417,12 @@ class _CartPageState extends State<CartPage> {
             children: [
               Text("Total:",
                   style: GoogleFonts.poppins(
-                      color: Colors.white70,
-                      fontSize: 14,
+                      color: textChocolate.withOpacity(0.7),
+                      fontSize: 12,
                       fontWeight: FontWeight.w600)),
               Text(formatRupiah(selectedTotal),
                   style: GoogleFonts.poppins(
-                      color: Colors.white,
+                      color: accentPink, // Angka Pink
                       fontSize: 18,
                       fontWeight: FontWeight.bold)),
             ],
@@ -452,11 +496,15 @@ class _CartPageState extends State<CartPage> {
                     }
                   },
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green.shade700,
+                backgroundColor: accentPink, // Tombol Pink
+                foregroundColor: Colors.white,
+                elevation: 5,
+                shadowColor: accentPink.withOpacity(0.4),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 12)),
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
             child:
-                Text('Beli Sekarang', style: GoogleFonts.poppins(color: Colors.white)),
+                Text('Checkout', style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

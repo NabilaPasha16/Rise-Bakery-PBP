@@ -19,6 +19,12 @@ class _LoginPageState extends State<LoginPage> {
   bool _isObscure = true;
   Map<String, String> _registeredUsers = {};
 
+  // --- PALET WARNA MEWAH ---
+  final Color _bgCream = const Color(0xFFFFF3E0);
+  final Color _bgPeach = const Color(0xFFFFE0B2);
+  final Color _textChocolate = const Color(0xFF5D4037);
+  final Color _accentGold = const Color(0xFFD4AF37);
+
   @override
   void initState() {
     super.initState();
@@ -35,7 +41,6 @@ class _LoginPageState extends State<LoginPage> {
           _registeredUsers = decoded.map((k, v) => MapEntry(k, v.toString()));
         });
       } catch (_) {
-        // ignore malformed stored data
         setState(() {
           _registeredUsers = {};
         });
@@ -53,7 +58,6 @@ class _LoginPageState extends State<LoginPage> {
       );
       return;
     }
-    // Require that the account exists in stored users
     if (!_registeredUsers.containsKey(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -65,7 +69,6 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // Validate password
     if (_registeredUsers[email] != password) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Password salah. Coba lagi.")),
@@ -77,12 +80,10 @@ class _LoginPageState extends State<LoginPage> {
       context,
     ).showSnackBar(SnackBar(content: Text("Login berhasil sebagai $email")));
 
-    // Gunakan GoRouter untuk navigasi
     context.toHome(email: email);
   }
 
   void _goToRegister() {
-    // Gunakan GoRouter untuk navigasi
     context.toRegister();
   }
 
@@ -90,130 +91,183 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     double formWidth = width > 600 ? 420 : width * 0.95;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8F0),
+      // Background scaffold dihilangkan karena kita pakai Container gradient
       body: Stack(
         children: [
-          // Image background overlay removed — using cream background only
+          // 1. Background Gradient (Selaras dengan Splash Screen)
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [_bgCream, _bgPeach],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+
+          // 2. Form Content
           Center(
             child: SingleChildScrollView(
               child: Container(
                 width: formWidth,
-                padding: EdgeInsets.all(
-                  4.w,
-                ), // Using percentage of screen width
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  color: Colors.white.withAlpha((0.92 * 255).round()),
+                  color: Colors.white.withOpacity(0.9), // Glass effect
                   borderRadius: BorderRadius.circular(32),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.pink.withAlpha((0.2 * 255).round()),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
+                      color: _textChocolate.withOpacity(0.15), // Shadow Coklat
+                      blurRadius: 30,
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(height: 10.h), // Using percentage of screen height
-                    Image.asset('assets/logo.png', height: 20.h, width: 40.w),
-                    SizedBox(height: 24),
+                    Image.asset('assets/logo.png', height: 18.h, width: 36.w),
+                    SizedBox(height: 2.h),
+                    
+                    // Font Playfair Display untuk kesan mewah
                     Text(
-                      "Selamat Datang di RISE BAKERY",
-                      style: GoogleFonts.poppins(
-                        fontSize: 26,
+                      "Selamat Datang",
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.pink[600],
-                        letterSpacing: 1.5,
+                        color: _textChocolate,
+                        letterSpacing: 1.0,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 24),
+                    Text(
+                      "RISE BAKERY",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: _accentGold,
+                        letterSpacing: 2.0,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    
+                    const SizedBox(height: 32),
+                    
+                    // Input Email
                     TextField(
                       controller: emailController,
-                      style: GoogleFonts.poppins(fontSize: 18),
+                      style: GoogleFonts.poppins(fontSize: 16, color: _textChocolate),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.pink[50],
+                        fillColor: Colors.white,
                         labelText: "Email / Nama",
                         labelStyle: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.pink[700],
+                          fontSize: 14,
+                          color: _textChocolate.withOpacity(0.7),
                         ),
-                        border: OutlineInputBorder(
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 18, horizontal: 20),
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.pink[400]!),
+                          borderSide: BorderSide(color: _textChocolate.withOpacity(0.2)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide(
-                            color: Colors.pink[600]!,
+                            color: _accentGold,
                             width: 2,
                           ),
                         ),
+                        prefixIcon: Icon(Icons.person_outline, color: _accentGold),
                       ),
                     ),
-                    const SizedBox(height: 18),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // Input Password
                     TextField(
                       controller: passwordController,
                       obscureText: _isObscure,
-                      style: GoogleFonts.poppins(fontSize: 18),
+                      style: GoogleFonts.poppins(fontSize: 16, color: _textChocolate),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.pink[50],
+                        fillColor: Colors.white,
                         labelText: "Password",
                         labelStyle: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.pink[700],
+                          fontSize: 14,
+                          color: _textChocolate.withOpacity(0.7),
                         ),
-                        border: OutlineInputBorder(
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 18, horizontal: 20),
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: _textChocolate.withOpacity(0.2)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide(
-                            color: Colors.pink[600]!,
+                            color: _accentGold,
                             width: 2,
                           ),
                         ),
+                        prefixIcon: Icon(Icons.lock_outline, color: _accentGold),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _isObscure
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.pink[400],
+                            _isObscure ? Icons.visibility_off : Icons.visibility,
+                            color: _textChocolate.withOpacity(0.5),
                           ),
                           onPressed: () =>
                               setState(() => _isObscure = !_isObscure),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 28),
+                    
+                    const SizedBox(height: 32),
+                    
+                    // Tombol Login (Coklat Mewah)
                     GFButton(
                       onPressed: _login,
                       text: "Login",
                       icon: const Icon(Icons.login, color: Colors.white),
                       fullWidthButton: true,
                       size: GFSize.LARGE,
-                      color: const Color.fromARGB(255, 237, 226, 125),
-                      elevation: 6,
-                      shape: GFButtonShape.pills, // bentuk rounded pills
+                      color: _textChocolate, // Menggunakan warna coklat tema
+                      elevation: 8,
+                      shape: GFButtonShape.pills,
                       textStyle: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
                         color: Colors.white,
+                        letterSpacing: 1.0,
                       ),
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
+                    
+                    // Tombol Register
                     TextButton(
                       onPressed: _goToRegister,
-                      child: Text(
-                        "Belum punya akun? Register di sini",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.pink[600],
+                      child: RichText(
+                        text: TextSpan(
+                          text: "Belum punya akun? ",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: _textChocolate.withOpacity(0.7),
+                          ),
+                          children: [
+                            TextSpan(
+                              text: "Register di sini",
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                color: _accentGold,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
