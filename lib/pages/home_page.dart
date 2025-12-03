@@ -8,8 +8,7 @@ import 'login_page.dart';
 import 'cart_page.dart';
 import 'profile_page.dart';
 import 'category_page.dart';
-import 'purchase_history_page.dart';
-// about_us_page is reachable via GoRouter; do not import directly here to avoid unused import
+import 'package:go_router/go_router.dart';
 import '../router/navigation_helpers.dart';
 import '../services/api_service.dart';
 import 'api_cakes_page.dart';
@@ -346,21 +345,15 @@ class _HomePageState extends State<HomePage> {
                     title: const Text('About Us'),
                     onTap: () async {
                       Navigator.pop(context);
-                      // navigate using GoRouter so the about page is reachable via URL (/about)
                       context.toAbout();
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.history, color: Colors.pinkAccent),
-                    title: const Text('Riwayat Pembelian'),
+                    leading: const Icon(Icons.mail_outline, color: Colors.pinkAccent),
+                    title: const Text('Contact Us'),
                     onTap: () async {
-                      Navigator.pop(context);
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const PurchaseHistoryPage(),
-                        ),
-                      );
+                      Navigator.pop(context); // Tutup drawer
+                      context.push('/contact');
                     },
                   ),
                   const Divider(),

@@ -12,6 +12,7 @@ import '../pages/api_cakes_page.dart';
 import '../pages/about_us_page.dart';
 import '../model/cake.dart';
 import '../services/api_service.dart';
+import '../pages/contact_us_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -88,6 +89,13 @@ class AppRouter {
       ),
       // About page route
       GoRoute(path: '/about', builder: (context, state) => const AboutUsPage()),
+      
+      // ⭐ Contact Us page route (TAMBAHAN BARU)
+      GoRoute(
+        path: '/contact',
+        name: 'contact',
+        builder: (context, state) => const ContactUsPage(),
+      ),
     ],
     errorBuilder: (context, state) => Scaffold(
       appBar: AppBar(title: const Text('Page not found')),

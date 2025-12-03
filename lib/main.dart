@@ -6,6 +6,7 @@ import 'bloc/cart_cubit.dart';
 import 'bloc/home_cubit.dart';
 import 'bloc/category_cubit.dart';
 import 'bloc/profile_cubit.dart';
+import 'bloc/contact_cubit.dart'; // ✅ TAMBAHAN 1: Import ini wajib
 import 'services/api_service.dart';
 import 'router/app_router.dart';
 
@@ -34,6 +35,11 @@ class MyApp extends StatelessWidget {
               create: (context) => CategoryCubit(apiService: ApiService()),
             ),
             BlocProvider(create: (context) => ProfileCubit()),
+            
+            // ✅ TAMBAHAN 2: Provider ContactCubit
+            BlocProvider(
+              create: (context) => ContactCubit(ApiService()), 
+            ),
           ],
           child: MaterialApp.router(
             debugShowCheckedModeBanner: false,

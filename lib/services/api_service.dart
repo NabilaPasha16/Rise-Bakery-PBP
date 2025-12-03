@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../model/cake.dart';
 import '../model/cake_category.dart';
+import '../model/contact_message.dart'; // ⭐ TAMBAHKAN INI
 import 'dart:math';
 
 class ApiService {
@@ -81,5 +82,37 @@ class ApiService {
       return 'Gagal terhubung ke server. Periksa koneksi Anda.';
     }
     return 'Terjadi kesalahan jaringan: ${err.message}';
+  }
+
+  // ----------------------------------------------------------
+  // 🔥 🔥 Tambahan baru untuk UPDATE API (tidak mengubah kode lama)
+  // ----------------------------------------------------------
+
+  /// 🔸 Contoh: update profil user (PUT)
+  Future<bool> updateProfile(Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.put(
+        '/update.php', // ganti dengan endpoint kamu kalau sudah ada
+        data: data,
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// 🔸 Kirim pesan "Contact Us" (DIPERBAIKI)
+  Future<bool> sendContactMessage(ContactMessage msg) async {
+    try {
+      final response = await _dio.post(
+        '/contact.php', // endpoint backend Anda
+        data: msg.toJson(),
+      );
+
+      return response.statusCode == 200;
+    } on DioException catch (e) {
+      throw Exception(_dioErrorMessage(e));
+    }
   }
 }

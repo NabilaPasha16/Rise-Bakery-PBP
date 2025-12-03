@@ -12,49 +12,56 @@ class AboutUsPage extends StatelessWidget {
         'nim': '24111814',
         'role': 'Project Lead & UI Designer',
         'ig': '@restu.ui',
-        'github': 'github.com/restuUI'
+        'github': 'github.com/restuUI',
+        'image': 'assets/restu.jpg',
       },
       {
         'name': 'Oktavio',
         'nim': '233307002',
         'role': 'Flutter Developer',
         'ig': '@oktavio.dev',
-        'github': 'github.com/oktavioDev'
+        'github': 'github.com/oktavioDev',
+        'image': 'assets/oktavio.jpg',
       },
       {
         'name': 'Rifkia',
         'nim': '233307003',
         'role': '3D & AR Specialist',
         'ig': '@rifkia.3d',
-        'github': 'github.com/rifkia3d'
+        'github': 'github.com/rifkia3d',
+        'image': 'assets/rifkia.jpg',
       },
       {
         'name': 'Rakha',
         'nim': '233307004',
         'role': 'QA & Tester',
         'ig': '@rakha.qat',
-        'github': 'github.com/rakhadev'
+        'github': 'github.com/rakhadev',
+        'image': 'assets/rakha.jpg',
       },
       {
         'name': 'Pratama',
         'nim': '233307005',
         'role': 'Content Writer',
         'ig': '@pratama.writer',
-        'github': 'github.com/pratamawrite'
+        'github': 'github.com/pratamawrite',
+        'image': 'assets/diki.jpg.jpg',
       },
       {
         'name': 'Nabila',
         'nim': '233307006',
         'role': 'Asset Research',
         'ig': '@nabilapasha',
-        'github': 'github.com/nabilapasha'
+        'github': 'github.com/nabilapasha',
+        'image': 'assets/nabila.jpg',
       },
       {
         'name': 'Enjel',
         'nim': '233307007',
         'role': 'UI/UX Support',
         'ig': '@enjel',
-        'github': 'github.com/enjelsmart'
+        'github': 'github.com/enjelsmart',
+        'image': 'assets/enjel.jpg',
       },
     ];
 
@@ -65,10 +72,8 @@ class AboutUsPage extends StatelessWidget {
         backgroundColor: const Color(0xffffb6d9),
         elevation: 0,
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -80,7 +85,11 @@ class AboutUsPage extends StatelessWidget {
                   CircleAvatar(
                     radius: 45,
                     backgroundColor: Colors.pink.shade200,
-                    child: const Icon(Icons.bakery_dining, size: 50, color: Colors.white),
+                    child: const Icon(
+                      Icons.bakery_dining,
+                      size: 50,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -110,8 +119,8 @@ class AboutUsPage extends StatelessWidget {
               child: Text(
                 'Tentang Aplikasi',
                 style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -158,10 +167,10 @@ class AboutUsPage extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: members.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,        // 3 KOTAK
+                crossAxisCount: 3, // 3 KOTAK DALAM 1 BARIS
                 mainAxisSpacing: 18,
                 crossAxisSpacing: 18,
-                childAspectRatio: 0.72,   // biar pas
+                childAspectRatio: 0.70, // Rasio agar teks muat di bawah
               ),
               itemBuilder: (context, idx) {
                 final m = members[idx];
@@ -170,7 +179,7 @@ class AboutUsPage extends StatelessWidget {
                 final nim = m['nim'] as String;
                 final ig = m['ig'] as String;
                 final github = m['github'] as String;
-                final initials = _initials(name);
+                final imagePath = m['image'] as String;
 
                 return Container(
                   decoration: BoxDecoration(
@@ -184,24 +193,26 @@ class AboutUsPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
                   child: Column(
                     children: [
+                      // --- BAGIAN FOTO (ASSETS) ---
                       CircleAvatar(
-                        radius: 25,
-                        backgroundColor: Colors.pink.shade300,
-                        child: Text(
-                          initials,
-                          style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontSize: 16),
-                        ),
+                        radius: 30, // Ukuran foto
+                        backgroundColor: Colors.pink.shade100,
+                        backgroundImage: AssetImage(imagePath), // Memuat gambar
+                        onBackgroundImageError: (exception, stackTrace) {
+                          debugPrint("Gagal memuat gambar: $imagePath");
+                        },
+                        child: imagePath.isEmpty
+                            ? const Icon(Icons.person, color: Colors.white)
+                            : null,
                       ),
 
                       const SizedBox(height: 8),
 
+                      // --- DATA ANGGOTA ---
                       Text(
                         name,
                         style: GoogleFonts.poppins(
@@ -268,11 +279,5 @@ class AboutUsPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _initials(String name) {
-    final parts = name.split(' ');
-    if (parts.length == 1) return parts.first[0].toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 }
