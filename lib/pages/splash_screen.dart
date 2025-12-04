@@ -106,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen>
                     
                     // JUDUL UTAMA (Font Serif untuk kesan Luxury)
                     Text(
-                      "PILACAKE",
+                      "RISE BAKERY",
                       style: GoogleFonts.playfairDisplay( // Ganti font ke serif mewah
                         fontSize: 48,
                         color: _textChocolate,
